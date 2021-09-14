@@ -15,8 +15,11 @@ def run(N,o):
     path_y = np.array(path_y)
     #plt.scatter(0,0,color='r',s=20,zorder=1,marker='x')
     #plt.plot(path_x,path_y,linewidth=0.2,zorder=0)
+    #plt.title('random walk σ=1, N=5000')
     #plt.show()
     return path_x,path_y
+
+
 
 steps = 1000
 simulations = 1000
