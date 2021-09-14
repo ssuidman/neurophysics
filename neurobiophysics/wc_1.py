@@ -45,5 +45,6 @@ plt.legend()
 plt.title('Diffusion law')
 plt.xlabel('t')
 plt.ylabel('D')
-plt.show()
+plt.show() 
+
 
