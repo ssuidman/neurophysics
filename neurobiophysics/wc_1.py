@@ -33,10 +33,10 @@ for sigma in [0.2,0.5,1.0,1.5]:
     D_sigma = length**2/(2*1)
     D.append(D_sigma)
 
+t = np.linspace(0,1000,1001)
 D_slope = np.nanmean(D/t,axis=1)
 print(D_slope)
 
-t = np.linspace(0,1000,1001)
 plt.plot(t,D[0],label='σ=0.2')
 plt.plot(t,D[1],label='σ=0.5')
 plt.plot(t,D[2],label='σ=1.0')
