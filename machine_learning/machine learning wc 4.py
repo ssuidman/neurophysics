@@ -22,12 +22,31 @@ X3 = np.reshape(X3,[784,n3])
 X7 = np.reshape(X7,[784,n7])
 X3 = X3/np.max((np.max(np.concatenate(X3)),np.max(np.concatenate(X7))))
 X7 = X7/np.max((np.max(np.concatenate(X3)),np.max(np.concatenate(X7))))
-X3 = np.insert(X3,0,1,axis=1)
-X7 = np.insert(X3,0,1,axis=1)
-X = [X3,X7]
-t = [np.zeros([1,n3])[0],np.ones([1,n7])[0]]
+
+#These are the important matrices and arrays in the end. X3 consists of P=6131 images of the number 3. X[3] for example is the 4th image. Each image has 28x28=784 pixels. To make sure that an image doesn't only consists of zeros, before each image is a 1 added. 
+X3 = (np.insert(X3,0,1,axis=0)).transpose() #shape = (6131,785)
+X7 = (np.insert(X3,0,1,axis=0)).transpose() #shape = (6265,785)
+t3 = np.zeros([1,n3])[0] #length = 6131
+t7 = np.ones([1,n7])[0] #length = 6265
 
 
+#these are the functions that are defined in the exercise 
+def y(w,X):
+    y = np.array([1/(1+np.exp(-np.dot(w,x))) for x in X])
+    return y 
+
+def E(w,X,t):
+    Ew = np.array([-1/len(x)*(t*np.log(y(w,x)+(1-t)*np.log(1-y(w,x)))) for x in X])
+    return Ew
+
+def dE(w,X,t):
+    dE = np.array([1/len(x)*(y(w,x)-t)*x for x in X])
+    return dE
+
+
+
+w = np.random.normal(0,1,size=X3[0].shape)
+t = np.random.randint(2,size=X3[0].shape)
 
 
 
