@@ -96,12 +96,8 @@ def H_weight_decay(w,X,k): #Hessian for the weight decay exercises
     return H
 
 def E_stochastic_gradient_descent(w,X,t,div_factor):
-    X = np.array(np.array_split(X,div_factor),dtype=object)
-    t = np.array(np.array_split(t,div_factor),dtype=object)
     Ew = np.sum([E(w,X[i],t[i]) for i in range(div_factor)])
     return Ew
-
-
 
 
 
@@ -204,6 +200,19 @@ def conjugate_gradient_descent(w,X,t,runs):
             print(i,str(round(T2-T1,1))+'s','E='+str(round(E(w,X,t),3)))
             print(g)
     return w
+
+def stochastic_gradient_descent(w0,X0,t0,e,div_factor,runs): 
+    T1 = time.time()
+    w = w0.copy()
+    Xi = np.array(np.array_split(X,div_factor),dtype=object)
+    ti = np.array(np.array_split(t,div_factor),dtype=object)
+    for i in range(runs):
+        w += -e*np.sum([dE(w,Xi[k],ti[k]) for k in range(div_factor)]) #waarschijnlijk gaat het in deze stap fout, omdat de som van al die gradient descent termen heel groot is. 
+        if i%100==0:
+            T2 = time.time()
+            print(i,str(round(T2-T1,1))+'s','E='+str(round(E_stochastic_gradient_descent(w,X,t,div_factor),3))) #Ook kijken naar de errorfunctie 
+    return w
+
 
 
 
