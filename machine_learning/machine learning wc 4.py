@@ -13,6 +13,7 @@ from numpy.core.function_base import linspace
 from numpy.linalg import inv
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
+from scipy import optimize
 import time
 
 #Loading in the MNIST data
@@ -95,9 +96,15 @@ def H_weight_decay(w,X,k): #Hessian for the weight decay exercises
     H = matmul(transpose(X_y),X)/len(X) + k/len(w)*np.eye(len(w)) #multiply this X*y times X, and sum over all patterns. The new shape is then (785,785)
     return H
 
-def E_stochastic_gradient_descent(w,X,t,div_factor):
-    Ew = np.sum([E(w,X[i],t[i]) for i in range(div_factor)])
+def E_line_search(w): #Return the error for w,X and the actual value 3,7 (so actual 1,0)
+    y0 = 1/(1+np.exp(-np.dot(X0,w)))
+    Ew = -sum(t0*log(y0)+(1-t0)*log(1-y0))/len(X0)
     return Ew
+
+def dE_line_search(w): #gradient for w,X,t
+    y0 = 1/(1+np.exp(-np.dot(X0,w)))
+    dE = matmul((y0-t0),X0)/len(X0)
+    return dE
 
 
 
@@ -163,7 +170,7 @@ def newton_method(w0,X,t,e,a,k,runs): #e=learning_rate, a=momentum_strength, k=w
     w = w0.copy()
     for i in range(runs):
         w += -np.matmul(inv(H_weight_decay(w,X,t,k)),dE_weight_decay(w,X,t,k))
-        if i%1==0:
+        if i%1==0: 
             T2 = time.time()
             print(i,str(round(T2-T1,1))+'s','E='+str(round(E(w,X,t),3)))
     return w
@@ -172,10 +179,8 @@ def line_search(w,X,t,runs):
     T1 = time.time()
     w = w0.copy()
     for i in range(runs):
-        d = -dE(w,X,t)
-        errors = np.array([E(w+i*d,X,t) for i in np.linspace(0.05,1.5,30)]) #create array with all errors for a certain gammas. 
-        min_error = np.where(errors == np.min(errors))[0][0] #find the index of the minimal error. 
-        g = np.linspace(0.05,1.5,30)[min_error] 
+        d = -dE_line_search(w)
+        g = optimize.line_search(E_line_search,dE_line_search,w0,d)[0]
         w += g*d
         if i%10==0:
             T2 = time.time()
@@ -207,10 +212,11 @@ def stochastic_gradient_descent(w0,X0,t0,e,div_factor,runs):
     Xi = np.array(np.array_split(X,div_factor),dtype=object)
     ti = np.array(np.array_split(t,div_factor),dtype=object)
     for i in range(runs):
-        w += -e*np.sum([dE(w,Xi[k],ti[k]) for k in range(div_factor)]) #waarschijnlijk gaat het in deze stap fout, omdat de som van al die gradient descent termen heel groot is. 
+        j = np.random.randint(0,div_factor)
+        w += -e*dE(w,Xi[j],ti[j]) #waarschijnlijk gaat het in deze stap fout, omdat de som van al die gradient descent termen heel groot is. 
         if i%100==0:
             T2 = time.time()
-            print(i,str(round(T2-T1,1))+'s','E='+str(round(E_stochastic_gradient_descent(w,X,t,div_factor),3))) #Ook kijken naar de errorfunctie 
+            print(i,str(round(T2-T1,1))+'s','E='+str(round(E(w,X,t),3))) #Ook kijken naar de errorfunctie 
     return w
 
 
@@ -232,11 +238,17 @@ results_weight_decay = [[E(w_weight_decay,X,t),wrong_patterns(w_weight_decay,X,t
 w_newton_method = newton_method(w0,X,t,e=0.05,a=0.03,k=0.01,runs=10) #learning the model via weight decay 
 results_newton_method = [[E(w_newton_method,X,t),wrong_patterns(w_newton_method,X,t)],[E(w_newton_method,X_test,t_test),wrong_patterns(w_newton_method,X_test,t_test)]]
 
+X0 = X.copy()
+t0 = t.copy()
 w_line_search = line_search(w0,X,t,runs=200) #learning the model via weight decay 
 results_line_search = [[E(w_line_search,X,t),wrong_patterns(w_line_search,X,t)],[E(w_line_search,X_test,t_test),wrong_patterns(w_line_search,X_test,t_test)]]
 
 w_conjugate_gradient_descent = conjugate_gradient_descent(w0,X,t,runs=200) #learning the model via weight decay 
 results_conjuage_gradient_descent = [[E(w_conjugate_gradient_descent,X,t),wrong_patterns(w_conjugate_gradient_descent,X,t)],[E(w_conjugate_gradient_descent,X_test,t_test),wrong_patterns(w_conjugate_gradient_descent,X_test,t_test)]]
+
+w_stochastic_gradient_descent = stochastic_gradient_descent(w0,X,t,e=0.01,div_factor=100,runs=5000) #learning the model via weight decay 
+results_stochastic_gradient_descent = [[E(w_stochastic_gradient_descent,X,t),wrong_patterns(w_stochastic_gradient_descent,X,t)],[E(w_stochastic_gradient_descent,X_test,t_test),wrong_patterns(w_stochastic_gradient_descent,X_test,t_test)]]
+
 
 #visualizing somehting 
 visualize(w_grad_descent,X,1328) #visualizing a learned model for a test handwritten digit 
