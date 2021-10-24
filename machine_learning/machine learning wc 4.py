@@ -96,14 +96,16 @@ def H_weight_decay(w,X,k): #Hessian for the weight decay exercises
     H = matmul(transpose(X_y),X)/len(X) + k/len(w)*np.eye(len(w)) #multiply this X*y times X, and sum over all patterns. The new shape is then (785,785)
     return H
 
+X_line_search = X.copy()
+t_line_search = t.copy()
 def E_line_search(w): #Return the error for w,X and the actual value 3,7 (so actual 1,0)
-    y0 = 1/(1+np.exp(-np.dot(X0,w)))
-    Ew = -sum(t0*log(y0)+(1-t0)*log(1-y0))/len(X0)
+    y0 = 1/(1+np.exp(-np.dot(X_line_search,w)))
+    Ew = -sum(t_line_search*log(y0)+(1-t_line_search)*log(1-y0))/len(X_line_search)
     return Ew
 
 def dE_line_search(w): #gradient for w,X,t
-    y0 = 1/(1+np.exp(-np.dot(X0,w)))
-    dE = matmul((y0-t0),X0)/len(X0)
+    y0 = 1/(1+np.exp(-np.dot(X_line_search,w)))
+    dE = matmul((y0-t_line_search),X_line_search)/len(X_line_search)
     return dE
 
 
@@ -129,7 +131,7 @@ def visualize(w,X,i): #Takes a model w, a dataset X and a image number and visua
 
 #These are the learning algorithms for the exercise 
 
-def grad_descent(w0,X,t,e,runs): #e=learning_rate
+def gradient_descent(w0,X,t,e,runs): #e=learning_rate
     T1 = time.time()
     w = w0.copy()
     for i in range(runs):
@@ -175,35 +177,33 @@ def newton_method(w0,X,t,e,a,k,runs): #e=learning_rate, a=momentum_strength, k=w
             print(i,str(round(T2-T1,1))+'s','E='+str(round(E(w,X,t),3)))
     return w
 
-def line_search(w,X,t,runs):
+def line_search(w1,X,t,runs):
     T1 = time.time()
-    w = w0.copy()
+    w = w1.copy()
     for i in range(runs):
         d = -dE_line_search(w)
-        g = optimize.line_search(E_line_search,dE_line_search,w0,d)[0]
+        g = optimize.line_search(E_line_search,dE_line_search,w,d)[0]
         w += g*d
         if i%10==0:
             T2 = time.time()
             print(i,str(round(T2-T1,1))+'s','E='+str(round(E(w,X,t),3)))
     return w
 
-def conjugate_gradient_descent(w,X,t,runs):
+
+def conjugate_gradient_descent(w1,X,t,runs):
     T1 = time.time()
-    w = w0.copy()
-    w_old = w.copy()
-    d = -dE(w,X,t)
+    w_old = w1.copy() #initialize both on w_old and w(=w_new) on the w1 that you start with 
+    w = w1.copy()
+    d = 0 #initialize d as 0 such that d is the gradient descent the first time it is used 
     for i in range(runs):
         b = dot(dE(w,X,t)-dE(w_old,X,t),dE(w,X,t))/np.dot(dE(w_old,X,t),dE(w_old,X,t))
         d = -dE(w,X,t) + b*d
-        errors = np.array([E(w+i*d,X,t) for i in np.linspace(0.05,0.9,30)]) #create array with all errors for a certain gammas. 
-        min_error = np.where(errors == np.min(errors))[0][0] #find the index of the minimal error. 
-        g = np.linspace(0.05,0.9,30)[min_error] 
+        g = optimize.line_search(E_line_search,dE_line_search,w,d)[0]
         w_old = w.copy()
         w += g*d
         if i%10==0:
             T2 = time.time()
             print(i,str(round(T2-T1,1))+'s','E='+str(round(E(w,X,t),3)))
-            print(g)
     return w
 
 def stochastic_gradient_descent(w0,X0,t0,e,div_factor,runs): 
@@ -226,8 +226,10 @@ def stochastic_gradient_descent(w0,X0,t0,e,div_factor,runs):
 #This is executing the script 
 w0 = np.random.normal(0,1,size=X.shape[1]) #initializing a random model w0 
 
-w_grad_descent = grad_descent(w0,X,t,e=0.05,runs=10000) #learning the model via gradient descent 
-results_grad_descent = [[E(w_grad_descent,X,t),wrong_patterns(w_grad_descent,X,t)],[E(w_grad_descent,X_test,t_test),wrong_patterns(w_grad_descent,X_test,t_test)]]
+results_random = [[E(w0,X,t),wrong_patterns(w0,X,t)],[E(w0,X_test,t_test),wrong_patterns(w0,X_test,t_test)]]
+
+w_gradient_descent = gradient_descent(w0,X,t,e=0.05,runs=10000) #learning the model via gradient descent 
+results_gradient_descent = [[E(w_gradient_descent,X,t),wrong_patterns(w_gradient_descent,X,t)],[E(w_gradient_descent,X_test,t_test),wrong_patterns(w_gradient_descent,X_test,t_test)]]
 
 w_momentum = momentum(w0,X,t,e=0.05,a=0.03,runs=10000) #learning the model via momentum 
 results_momentum = [[E(w_momentum,X,t),wrong_patterns(w_momentum,X,t)],[E(w_momentum,X_test,t_test),wrong_patterns(w_momentum,X_test,t_test)]]
@@ -238,9 +240,7 @@ results_weight_decay = [[E(w_weight_decay,X,t),wrong_patterns(w_weight_decay,X,t
 w_newton_method = newton_method(w0,X,t,e=0.05,a=0.03,k=0.01,runs=10) #learning the model via weight decay 
 results_newton_method = [[E(w_newton_method,X,t),wrong_patterns(w_newton_method,X,t)],[E(w_newton_method,X_test,t_test),wrong_patterns(w_newton_method,X_test,t_test)]]
 
-X0 = X.copy()
-t0 = t.copy()
-w_line_search = line_search(w0,X,t,runs=200) #learning the model via weight decay 
+w_line_search = line_search(w0,X,t,runs=300) #learning the model via weight decay 
 results_line_search = [[E(w_line_search,X,t),wrong_patterns(w_line_search,X,t)],[E(w_line_search,X_test,t_test),wrong_patterns(w_line_search,X_test,t_test)]]
 
 w_conjugate_gradient_descent = conjugate_gradient_descent(w0,X,t,runs=200) #learning the model via weight decay 
