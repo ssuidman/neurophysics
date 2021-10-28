@@ -179,7 +179,7 @@ def newton_method(w0,X,t,e,a,k,runs): #e=learning_rate, a=momentum_strength, k=w
     T1 = time.time()
     w = w0.copy()
     for i in range(runs):
-        w += -np.matmul(inv(H_weight_decay(w,X,t,k)),dE_weight_decay(w,X,t,k))
+        w += -np.matmul(inv(H_weight_decay(w,X,t,k)),dE_weight_decay(w,X,t,k)) 
         if i%1==0: 
             T2 = time.time()
             print(i,str(round(T2-T1,1))+'s','E='+str(round(E(w,X,t),3)))
@@ -187,7 +187,7 @@ def newton_method(w0,X,t,e,a,k,runs): #e=learning_rate, a=momentum_strength, k=w
     dt = T2-T1
     return w, dt
 
-def line_search(w1,X,t,runs=300):
+def line_search(w1,X,t,runs=300): 
     T1 = time.time()
     w = w1.copy()
     for i in range(runs):
@@ -260,20 +260,27 @@ w_line_search, t_line_search = line_search(w0,X,t) #learning the model via weigh
 results_line_search = [[E(w_line_search,X,t),wrong_patterns(w_line_search,X,t)],[E(w_line_search,X_test,t_test),wrong_patterns(w_line_search,X_test,t_test)]]
 
 w_conjugate_gradient_descent, t_conjugate_gradient_descent = conjugate_gradient_descent(w0,X,t) #learning the model via weight decay 
-results_conjuage_gradient_descent = [[E(w_conjugate_gradient_descent,X,t),wrong_patterns(w_conjugate_gradient_descent,X,t)],[E(w_conjugate_gradient_descent,X_test,t_test),wrong_patterns(w_conjugate_gradient_descent,X_test,t_test)]]
+results_conjugate_gradient_descent = [[E(w_conjugate_gradient_descent,X,t),wrong_patterns(w_conjugate_gradient_descent,X,t)],[E(w_conjugate_gradient_descent,X_test,t_test),wrong_patterns(w_conjugate_gradient_descent,X_test,t_test)]]
 
 w_stochastic_gradient_descent, t_stochastic_gradient_descent = stochastic_gradient_descent(w0,X,t) #learning the model via weight decay 
 results_stochastic_gradient_descent = [[E(w_stochastic_gradient_descent,X,t),wrong_patterns(w_stochastic_gradient_descent,X,t)],[E(w_stochastic_gradient_descent,X_test,t_test),wrong_patterns(w_stochastic_gradient_descent,X_test,t_test)]]
 
 
-
 #show results
+print('results random')
+show_results(results_random,0)
+print('results gradient_descent')
 show_results(results_gradient_descent,t_gradient_descent)
+print('results momentum')
 show_results(results_momentum,t_momentum)
+print('results weight decay')
 show_results(results_weight_decay,t_weight_decay)
+print('results line search')
 show_results(results_line_search,t_line_search)
+print('results conjugate gradient descent')
 show_results(results_conjuage_gradient_descent,t_conjugate_gradient_descent)
+print('stochastic gradient descent')
 show_results(results_stochastic_gradient_descent,t_stochastic_gradient_descent)
-visualize(w_grad_descent,X,1328) #visualizing a learned model for a test handwritten digit 
+#visualize(w_grad_descent,X,1328) #visualizing a learned model for a test handwritten digit 
 
 
