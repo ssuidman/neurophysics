@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 #   1a  #
 ###############################################################
 
-def modified_euler(f,v0,u0,h,t0,t1,I):
+def modified_euler(f,v0,u0,h,t0,t1,I): #Modified Euler algorithm for a system f, initial values v0,u0, stepsize h, time range and current I
     v_list = [v0]
     u_list = [u0]
     v = v_list[0]
@@ -24,7 +24,7 @@ def modified_euler(f,v0,u0,h,t0,t1,I):
     return np.array(v_list),np.array(u_list)
 
 
-def phase_plane(system,x0,y0,a,b=0,c=0,t_range=[0,10],xlim=[-10,10],ylim=[-10,10],variables=["x","y"]): 
+def phase_plane(system,x0,y0,a,b=0,c=0,t_range=[0,10],xlim=[-10,10],ylim=[-10,10],variables=["x","y"]): #Here a phase plane can be plotted
     t = np.linspace(t_range[0],t_range[1],(t_range[1]-t_range[0])*100) #set time range
     x,y = modified_euler(f,x0,y0,0.01,t_range[0],t_range[1],a) #creates arrays for x,y
     
@@ -65,7 +65,7 @@ tlim = [0,1000]
 vlim = [-70,35]
 ulim = [-100,300]
 h = 0.01
-I = 60
+I = 60 #By adapting I (and time range) you can see where the bifuraction happens
 v,u = modified_euler(f,v0,u0,h,tlim[0],tlim[1],I)
 
 fig_phase_plane = phase_plane(system,x0=v0,y0=u0,a=I,t_range=tlim,xlim=vlim,ylim=ulim,variables=["v","u"])
@@ -100,44 +100,69 @@ plt.show()
 
 
 def coupled_neurons(f,N,v0,u0,h,t0,t1,I0,k):
-    N = 5
-    connection_matrix = [ [0,k,0,0,k] , [k,0,k,0,0] , [0,k,0,k,0] , [0,0,k,0,k] , [k,0,0,k,0] ]
-    time_range = np.linspace(t0,t1,int((t1-t0)/h))
-    v_list = [[v0 for j in range(len(time_range)+1)] for i in range(N)]
-    v_list[0][0] = v0
-    u_list = [[0 for j in range(len(time_range)+1)] for i in range(N)]
-    v_list[0][0] = u0
-    I_list = [[0 for j in range(len(time_range)+1)] for i in range(N)]
-    I_list[0][0] = I0
-    
-    for t in range(len(time_range)):
-        for n in range(N):    
-            v = v_list[n][t]
+    connection_matrix = [] #In the matrix you can set different constraints on the coupling 
+    for i in range(N):
+        connection_matrix.append([])
+        for j in range(N): 
+            if j==(i-1)%N or j==(i+1)%N:
+                connection_matrix[i].append(k)
+            elif j==(i-2)%N:
+                connection_matrix[i].append(-k/4)
+            else:
+                connection_matrix[i].append(0)
+    np.array(connection_matrix)
+
+    time_range = np.linspace(t0,t1,int((t1-t0)/h)) #setting time range
+    v_list = -50*np.ones([N,len(time_range)+1]) #creating matrix for N values of v at len(time_range)+1 time points. 
+    u_list = np.zeros([N,len(time_range)+1])
+    u_list[0][0] = u0 #starting the u matrix at zero 
+    I_list = np.zeros([N,len(time_range)+1]) #creating matrix for the current for different neurons at different time points 
+    for i in range(10):
+        I_list[0][i] = I0 #setting I0 for the first 10 time pionts for the first neuron
+        v_list[0][i] = v0 #same for v0 
+
+    for t in range(len(time_range)): #look at each time point
+        print(round(t/len(time_range),3)) #tracking running time 
+        for n in range(N): #look at each neuron
+            v = v_list[n][t] #take over v,u,I for the neuron
             u = u_list[n][t]
             I = I_list[n][t]
-            v_tilde = v + h*f(v,u,I)[0]
+            v_tilde = v + h*f(v,u,I)[0] #do the modified euler algorithm
             u_tilde = u + h*f(v,u,I)[1]
             v += 0.5*h*(f(v,u,I)[0]+f(v_tilde,u_tilde,I)[0]) 
             u += 0.5*h*(f(v,u,I)[1]+f(v_tilde,u_tilde,I)[1]) 
-            if v<=35:
+            if v<=35: #if not spiking just adapt v,u to new value
                 v_list[n][t+1] = v
                 u_list[n][t+1] = u
-                I_list[n][t+1] += I
-            elif v>35:
+            elif v>35: #else pass the criteria given
                 v_list[n][t+1] = -50
                 u_list[n][t+1] = u+100
-                for m in range(N):
-                    t_pulse = 0.1 #sec is the duration of a pulse
-                    for i in range(int(t_pulse/h)):
-                        I_list[m][t+1+i] += connection_matrix[n][m] * I0
-        #if I_list[0][t+1] == 0: #does the fist neuron need to get a continuous spike?
-        #    I_list[0][t+1] = I0
+                for m in range(N): #send current of certain time to the next neurons
+                    t_pulse = 10 #sec is the duration of a pulse
+                    I_list[m][t+1 : t+1+int(t_pulse/h)] += connection_matrix[n][m] * I0
     return v_list,u_list,I_list #v_list[n][t] gives the voltage of neuron n on time t. This means v_list[n] gives its voltage evolving over time 
 
+def f(v,u,I):
+    dv = 1/100*(0.7*(v+60)*(v+40)-u+I)
+    du = 0.03*(-2*(v+60)-u)
+    return dv, du
 
-v,u,I = coupled_neurons(f,3,-50,0,0.1,0,300,200,0.5)
-for i in range(5):
-    plt.plot(v[i], label=i)
-plt.legend()
+N=50
+v0 = 0
+u0 = 0
+tlim = [0,300]
+h = 0.1
+I = 200 #By adapting I (and time range) you can see where the bifuraction happens
+k = 3 #coupling constant
+v,u,I = coupled_neurons(f,N,v0=v0,u0=u0,h=h,t0=tlim[0],t1=tlim[1],I0=I,k=k) #start v0=0 to get the spikes going 
 
-plt.eventplot(v)
+#create rasterplot
+v_dots = np.where(v==-50,1,0) 
+fig,ax = plt.subplots(nrows=1,ncols=1)
+t = np.linspace(tlim[0],tlim[1],len(v[0]))
+for i in range(N):
+    ax.scatter(t,i*0.1*v_dots[i],s=1.0)
+ax.set_title("Rasterplot example")
+ax.set_xlabel("time")
+fig.show()
+
