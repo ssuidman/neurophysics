@@ -1,0 +1,15 @@
+For Windows/Linux/macOS, you can download the installer directly
+from www.mathworks.com if you sign in (create an account) in the upper
+right corner with your RU or Radboudumc mail address.
+Add our Academic License with license code 38957 to your account.
+Then hit "Download" and pick the version you want for the
+Operating System you want. This will download the installer (ca. 200 MB).
+You can then log in to the installer and select to install the Academic
+license 38957.  The installer will ask you to browse the attached license
+file Matlablicense.txt. So you should have saved that in a place that
+you can find.
+
+    - If you install all toolboxes, the installation might need ca. 25 GB.
+    - You do NOT need to install/configure/run a License manager.
+    - Please do NOT share this info with people that have no right to use the
+      RU concurrent academic license.

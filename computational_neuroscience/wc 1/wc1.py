@@ -12,8 +12,8 @@ def second_order(x0,y0,h,f,xlim=[0,1]):
     xn = x[0]
     yn = y[0]
     while xn>=xlim[0] and xn<xlim[1]:
-        yn_tilde = yn + h*f(xn,yn,I)
-        yn += 0.5*h*(f(xn,yn,I)+f(xn+h,yn_tilde,I))
+        yn_tilde = yn + h*f(xn,yn)
+        yn += 0.5*h*(f(xn,yn)+f(xn+h,yn_tilde))
         xn += h
         x.append(xn)
         y.append(yn)
@@ -27,10 +27,10 @@ def fourth_order(x0,y0,h,f,xlim=[0,1]):
     xn = x[0]
     yn = y[0]
     while xn>=xlim[0] and xn<xlim[1]:
-        k1 = h*f(xn,yn,I)
-        k2 = h*f(xn+0.5*h,yn+0.5*k1,I)
-        k3 = h*f(xn+0.5*h,yn+0.5*k2,I)
-        k4 = h*f(xn+h,yn+k3,I)
+        k1 = h*f(xn,yn)
+        k2 = h*f(xn+0.5*h,yn+0.5*k1)
+        k3 = h*f(xn+0.5*h,yn+0.5*k2)
+        k4 = h*f(xn+h,yn+k3)
         yn += 1/6*(k1+2*k2+2*k3+k4)
         xn += h
         x.append(xn)
@@ -65,9 +65,9 @@ def pendulum(x0,y0,h,f,xlim=[0,1],I=0):
     t = 0
     while t<t_end:
         k1 = h*f1()
-        k2 = h*f1(xn+0.5*h,yn+0.5*k1,I)
-        k3 = h*f1(xn+0.5*h,yn+0.5*k2,I)
-        k4 = h*f1(xn+h,yn+k3,I)
+        k2 = h*f1(xn+0.5*h,yn+0.5*k1)
+        k3 = h*f1(xn+0.5*h,yn+0.5*k2)
+        k4 = h*f1(xn+h,yn+k3)
         yn += 1/6*(k1+2*k2+2*k3+k4)
 
 
@@ -76,10 +76,10 @@ def pendulum(x0,y0,h,f,xlim=[0,1],I=0):
     xn = x[0]
     yn = y[0]
     while xn>=xlim[0] and xn<xlim[1]:
-        k1 = h*f(xn,yn,I)
-        k2 = h*f(xn+0.5*h,yn+0.5*k1,I)
-        k3 = h*f(xn+0.5*h,yn+0.5*k2,I)
-        k4 = h*f(xn+h,yn+k3,I)
+        k1 = h*f(xn,yn)
+        k2 = h*f(xn+0.5*h,yn+0.5*k1)
+        k3 = h*f(xn+0.5*h,yn+0.5*k2)
+        k4 = h*f(xn+h,yn+k3)
         yn += 1/6*(k1+2*k2+2*k3+k4)
         xn += h
         x.append(xn)
@@ -88,7 +88,7 @@ def pendulum(x0,y0,h,f,xlim=[0,1],I=0):
     y = np.array(y)
     return x,y
 
-def y2_prime(y1,y2,I):
+def y2_prime(y1,y2):
     return (1-np.sin(y1))/y2
 
 #y1 = np.linspace(-np.pi/2-1,np.pi/2+1)

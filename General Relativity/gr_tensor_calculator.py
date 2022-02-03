@@ -7,7 +7,8 @@ from sympy import simplify
 t,r,theta,phi = sympy.symbols('t r θ φ') #define symbols
 nu = sympy.Function('ν')(t,r)
 mu = sympy.Function('μ')(r)
-metric_list = [[0 for i in range(4)] for i in range(4)] #create empty matrix
+n = 4
+metric_list = [[0 for i in range(n)] for i in range(n)] #create empty matrix
 metric_list[0][0] = -sympy.exp(nu) #fill in the matrix (of the metric) with the symbols
 metric_list[1][1] = sympy.exp(mu)
 metric_list[2][2] = r**2
@@ -18,7 +19,7 @@ metric.tensor() #metric.tensor() to show the tensor. metric.inv() to get inverse
 
 #calculating other tensors starting with metric 
 christoffel_symbols = ChristoffelSymbols.from_metric(metric)
-riemann_tensor = RiemannCurvatureTensor.from_christoffels(christoffel_symbols) #=R[pho][sigma][mu][nu]
+riemann_tensor = RiemannCurvatureTensor.from_christoffels(christoffel_symbols) #=R[pho][mu][sigma][nu]
 ricci_tensor = RicciTensor.from_riemann(riemann_tensor)
 ricci_scalar = RicciScalar.from_riccitensor(ricci_tensor) #can also calculate it directly from metric, but if you want all objects then this is faster.
 
