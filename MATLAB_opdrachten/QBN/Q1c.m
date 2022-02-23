@@ -23,9 +23,6 @@ phi2 = I2./(4*pi*e0.*(X.^2+(Y-d).^2)) ;
 phi = phi1 + phi2 ;
 
 figure(1) ;
-% quiver(X,Y,Ex,Ey) ; 
-% quiver(X,Y,Ex./abs(Ex),Ey./abs(Ey)) ; 
-% 
-% hold on
-% figure(2) ;
-contour(X,Y,phi) ;
+quiver(X,Y,tanh(Ex/10^8),tanh(Ey/10^8)) ; 
+hold on
+contour(X,Y,tanh(phi/10^8)) ;

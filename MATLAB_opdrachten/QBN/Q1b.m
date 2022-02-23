@@ -13,10 +13,8 @@ Ey = A .* Y ;
 phi = I./(4*pi*e0.*(X.^2+Y.^2))
 
 figure(1) ; 
-quiver(X,Y,Ex./abs(Ex),Ey./abs(Ey)) ; 
-
+quiver(X,Y,tanh(Ex/50),tanh(Ey/50)) ; 
 hold on ;
-
-contour(X,Y,phi) ;
+contour(X,Y,tanh(phi/500)) ;
 
 
