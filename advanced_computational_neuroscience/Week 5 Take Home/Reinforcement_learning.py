@@ -5,7 +5,6 @@ from tqdm import trange,tqdm
 from mpl_toolkits.mplot3d import art3d
 from scipy.interpolate import interp2d
 
-
 def create_circle(n,r,include_border=False): 
     """ Create circle of radius r with approximately n points. Return array with 
     coordinates of these points """
@@ -33,7 +32,7 @@ def show_points(points,r):
     ax.set_ylim([-r-r/10,r+r/10])
     plt.show()
 
-def f(ix,iy,px,py,sigma=2):
+def f(ix,iy,px,py,sigma):
     """ Takes coordinate(s) of place cells and space grid and return the firing rate. The shape it returns depends on the input. """
     if type(ix)==np.ndarray and type(px)==np.ndarray:
         sum1 = np.transpose(np.outer(np.ones(len(px)),np.ones(len(ix)))*ix) - np.outer(np.ones(len(ix)),np.ones(len(px)))*px
@@ -43,20 +42,20 @@ def f(ix,iy,px,py,sigma=2):
         firing_rate = np.exp(-((ix-px)**2+(ix-py)**2)/(2*sigma**2))
     return firing_rate
 
-def get_C(place_cells,px,py,w): 
+def get_C(place_cells,px,py,w,sigma): 
     """ Return C(p) for all points p given some w. """ 
-    firing_rate = f(place_cells[:,0],place_cells[:,1],px,py)
+    firing_rate = f(place_cells[:,0],place_cells[:,1],px,py,sigma)
     if type(px)==np.ndarray:
         C = np.matmul(np.transpose(firing_rate),w)
     else:
         C = np.dot(firing_rate,w)
-    return np.tanh(C) # otherwise infinities can arise
+    return C # otherwise infinities can arise
 
-def get_a(place_cells,px,py,z): 
+def get_a(place_cells,px,py,z,sigma): 
     """ Return a(p) for all points p, all directions j given some w. """
-    firing_rate = f(place_cells[:,0],place_cells[:,1],px,py)
+    firing_rate = f(place_cells[:,0],place_cells[:,1],px,py,sigma)
     a = np.matmul(z,firing_rate)
-    return np.tanh(a) # otherwise infinities can arise
+    return a # otherwise infinities can arise
 
 def get_R(Rx,Ry,Rr,px,py):
     R = np.where((px-Rx)**2+(py-Ry)**2<Rr**2,1,0)
@@ -100,9 +99,10 @@ def contour_plot(px,py,z,r,Rx,Ry,Rr,D3=False):
     plt.show()
 
 def quiver_plot(px,py,a,Rx,Ry,Rr,stream=False): ######## DEZE FUNCTIE IS NOT NIET AF ############
-    theta = np.argmax(a,axis=0)*np.pi/4
     fig,ax = plt.subplots()
-    ax.quiver(px,py,np.cos(theta),np.sin(theta))
+    theta = np.outer(np.arange(8)*np.pi/4,np.ones(len(place_cells)))
+    x,y = get_a(place_cells,place_cells[:,0],place_cells[:,1],z,sigma)*np.array([np.cos(theta),np.sin(theta)])
+    ax.quiver(place_cells[:,0],place_cells[:,1],np.sum(x,axis=0),np.sum(y,axis=0),color='r')
     circle = plt.Circle((0,0),r,fill=False,color='r')
     ax.add_patch(circle)
     circle2 = plt.Circle((Rx,Ry),Rr,fill=False,color='blue')
@@ -110,33 +110,27 @@ def quiver_plot(px,py,a,Rx,Ry,Rr,stream=False): ######## DEZE FUNCTIE IS NOT NIE
     if stream:
         xi = np.linspace(px.min(), px.max(), px.size)
         yi = np.linspace(py.min(), py.max(), py.size)
-        uCi = interp2d(px, py, np.cos(theta))(xi, yi)
-        vCi = interp2d(px, py, np.sin(theta))(xi, yi)
-        plt.streamplot(xi, yi, uCi, vCi)
+        uCi = interp2d(px, py, np.sum(x,axis=0))(xi, yi)
+        vCi = interp2d(px, py, np.sum(y,axis=0))(xi, yi)
+        ax.streamplot(xi, yi, uCi, vCi)
     plt.show()
 
-def path_plot(p_path,trial,space_grid,w,z,t,i,r,Rx,Ry,Rr):
+def path_plot(p_path,trial,space_grid,w,z,t,i,r,Rx,Ry,Rr,sigma):
     fig,ax = plt.subplots() 
     platform_circle = plt.Circle((Rx,Ry),Rr,fill=False,color='r') 
     ax.add_patch(platform_circle) 
     space_circle = plt.Circle((0,0),r,fill=False,color='b') 
     ax.add_patch(space_circle) 
     ax.plot(p_path[t+1:i,0],p_path[t+1:i,1],color='black') 
-    contour = ax.tricontourf(space_grid[:,0],space_grid[:,1],get_C(place_cells,space_grid[:,0],space_grid[:,1],w),cmap="rainbow")
-    theta = np.argmax(get_a(place_cells,place_cells[:,0],place_cells[:,1],z),axis=0)*np.pi/4
-    ax.quiver(place_cells[:,0],place_cells[:,1],np.cos(theta),np.sin(theta))
+    contour = ax.tricontourf(space_grid[:,0],space_grid[:,1],get_C(place_cells,space_grid[:,0],space_grid[:,1],w,sigma),cmap="rainbow")
+    theta = np.outer(np.arange(8)*np.pi/4,np.ones(len(place_cells)))
+    x,y = get_a(place_cells,place_cells[:,0],place_cells[:,1],z,sigma)*np.array([np.cos(theta),np.sin(theta)])
+    ax.quiver(place_cells[:,0],place_cells[:,1],np.sum(x,axis=0),np.sum(y,axis=0),color='r')
     ax.set_title('trial {}'.format(trial)) 
     fig.colorbar(contour)
     plt.show() 
 
-def rodent_swim(place_cells,space_grid,T,gamma,Rx,Ry,Rr,k):
-    N = len(place_cells) # there are exactly N place_cells
-    # w = np.random.normal(0,0.03,size=N)
-    # z = np.random.normal(0,0.03,size=[8,N])
-    w = np.ones(N)*0.01
-    z = np.ones([8,N])*0.01
-    contour_plot(space_grid[:,0],space_grid[:,1],get_C(place_cells,space_grid[:,0],space_grid[:,1],w),r,Rx,Ry,Rr)
-
+def rodent_swim(place_cells,space_grid,w,z,T,gamma,Rx,Ry,Rr,kw,kz,sigma):
     p_start_x = space_grid[np.where(space_grid[:,0]==np.max(space_grid[:,0]))]
     p_start = p_start_x[np.where(np.abs(p_start_x[:,1])==np.min(np.abs(p_start_x[:,1])))][0]
     p = p_start.copy()
@@ -146,62 +140,76 @@ def rodent_swim(place_cells,space_grid,T,gamma,Rx,Ry,Rr,k):
     t = 0
     iterations = trange(1,T,desc="trial {}".format(trial))
     count = 0 
+    path_plot(p_path,trial,space_grid,w,z,t,1,r,Rx,Ry,Rr,sigma)
     for i in iterations:
         neighbours = get_neighbours(p,space_grid[:,0],space_grid[:,1])
-        a = get_a(place_cells,p[0],p[1],z)*(neighbours[:,0]*0+1)
-        C = get_C(place_cells,p[0],p[1],w)
+        a = get_a(place_cells,p[0],p[1],z,sigma)*(neighbours[:,0]*0+1)
+        C = get_C(place_cells,p[0],p[1],w,sigma)
         R = get_R(Rx,Ry,Rr,p[0],p[1])
-        firing_rate = f(place_cells[:,0],place_cells[:,1],p[0],p[1])
+        firing_rate = f(place_cells[:,0],place_cells[:,1],p[0],p[1],sigma)
         P_neighbours_nan = np.exp(2*a)/np.nansum(np.exp(2*a))
         P_neighbours = np.where(np.isnan(P_neighbours_nan),0,P_neighbours_nan) # if at boundary this direction cannot be chosen and P=0
+        if np.sum(P_neighbours)<0.9:
+            print(a,P_neighbours)
         direction = np.random.choice(np.arange(len(P_neighbours)),p=P_neighbours) # pick a direction from the probability distribution
         p = neighbours[direction]
         p_path[i] = p
         if R!=1:
-            C_new = get_C(place_cells,p[0],p[1],w)
+            C_new = get_C(place_cells,p[0],p[1],w,sigma)
         else:
             C_new = 0
+        p_path[i] = p
         delta = R+gamma*C_new-C
         dw = delta*firing_rate
         g = np.zeros([8,N])
         g[direction,:] = 1
         dz = delta*firing_rate*g
-        w += k*dw
-        z += k*dz
+        if i%1000==0:
+            iterations.set_description("trial {}, δ={:.0e}".format(trial,np.abs(delta)))
+            iterations.refresh()
+        w += kw*dw
+        z += kz*dz
         if R==1:
-            if trial%1==0:
-                path_plot(p_path,trial,space_grid,w,z,t,i,r,Rx,Ry,Rr)
+            if trial%20==0:
+                path_plot(p_path,trial,space_grid,w,z,t,i,r,Rx,Ry,Rr,sigma)
             p = p_start.copy() 
             t = i
             trial += 1
             count = 0
-            iterations.set_description("trial {}".format(trial,np.max(dw)))
+            iterations.set_description("trial {}, δ={:.0e}".format(trial,np.abs(delta)))
             iterations.refresh()
         count += 1
-        if count > 10000:
-            print('Reset')
-            path_plot(p_path,trial,space_grid,w,z,t,i,r,Rx,Ry,Rr)
-            print(a)
-            p = p_start.copy()
-            count = 0
-            t = i
-    return w,z,dw
+        if count%10000==0:
+            path_plot(p_path,trial,space_grid,w,z,t,i,r,Rx,Ry,Rr,sigma)
+            print(P_neighbours)
+            if count > 100000:
+                print('P',P_neighbours)
+                print('Reset')
+                p = p_start.copy()
+                count = 0
+                t = i
+    path_plot(p_path,trial,space_grid,w,z,t,t,r,Rx,Ry,Rr,sigma)
+    return w,z
 
 r = 2
 n = 493 # approximately  points
-T = 1000000
-gamma = 0.7
+T = 100000
+sigma = 0.2
+gamma = 0.9
+kw = 0.1 # is learning rate for w and z
+kz = 0.1
 Rx,Ry,Rr = -0.5,0.5,0.2
-k = 0.05 # is learning rate for w and z
 place_cells = create_circle(n,r,T)
-space_grid = create_circle(2*n,r,include_border=True)
-w,z,dw = rodent_swim(place_cells,space_grid,T,gamma,Rx,Ry,Rr,k)
+space_grid = create_circle(n*2,r,include_border=True)
+N = len(place_cells) # there are exactly N place_cells
+# w0 = np.random.normal(0,1,size=N)
+# z0 = np.random.normal(0,1,size=[8,N])
+w0 = np.zeros(N)
+z0 = np.zeros([8,N])
 
-C = get_C(place_cells,space_grid[:,0],space_grid[:,1],w)
-contour_plot(space_grid[:,0],space_grid[:,1],C,r,Rx,Ry,Rr)
-a = get_a(place_cells,place_cells[:,0],place_cells[:,1],z)
-quiver_plot(place_cells[:,0],place_cells[:,1],a,Rx,Ry,Rr)
+w,z = rodent_swim(place_cells,space_grid,w0,z0,T,gamma,Rx,Ry,Rr,kw,kz,sigma)
 
-
-# Het probleem is waarschijnlijk dat ik np.nan gebruik voor a en dat daardoor die stap niet wordt afgestraft
-# door de code. Hierdoor beweegt hij niet de andere kant op maar schuin op en neer de hele tijd. 
+C = get_C(place_cells,space_grid[:,0],space_grid[:,1],w,sigma)
+contour_plot(space_grid[:,0],space_grid[:,1],C,r,Rx,Ry,Rr,D3=True)
+# a = get_a(place_cells,place_cells[:,0],place_cells[:,1],z,sigma)
+# quiver_plot(place_cells[:,0],place_cells[:,1],a,Rx,Ry,Rr,stream=False
