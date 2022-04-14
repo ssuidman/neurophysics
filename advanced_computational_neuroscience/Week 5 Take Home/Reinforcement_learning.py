@@ -22,17 +22,6 @@ def create_circle(n,r,include_border=False):
     points = np.transpose(np.array([x_in_circle,y_in_circle]))
     return points
 
-def show_points(points,r):
-    """ Takes points that are supposed to be in circle with radius r and
-    visualizes the points inside a cricle. """
-    fig,ax = plt.subplots()
-    circle = plt.Circle((0,0),r,fill=False)
-    ax.scatter(points[:,0],points[:,1],s=0.5)
-    ax.add_patch(circle)
-    ax.set_xlim([-r-r/10,r+r/10])
-    ax.set_ylim([-r-r/10,r+r/10])
-    plt.show()
-
 def f(ix,iy,px,py,sigma):
     """ Takes coordinate(s) of place cells and space grid and return the firing rate. The shape it returns depends on the input. """
     if type(ix)==np.ndarray and type(px)==np.ndarray:
@@ -75,27 +64,22 @@ def get_neighbours(coord,px,py):
             neighbours[i] = unique_values[x+a],unique_values[y+b]
     return neighbours
 
-def contour_plot(px,py,z,r,Rx,Ry,Rr,saving_path,start=True,cont=True,fig_save=False,D3=False): 
-    if D3:
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-        contour = ax.plot_trisurf(px,py,z,cmap="rainbow")
-        if cont:
-            contour = ax.tricontourf(px,py,z,cmap="rainbow", offset=0)
-        circle = plt.Circle((0,0),r,fill=False,color='r')
-        ax.add_patch(circle)
-        art3d.pathpatch_2d_to_3d(circle,z=0,zdir='z')
-        platform_circle = plt.Circle((Rx,Ry),Rr,fill=True,color='blue')
-        ax.add_patch(platform_circle)
-        art3d.pathpatch_2d_to_3d(platform_circle,z=0.001,zdir='z')
-        ax.set_zlim(0,np.max(z))
+def surface_plot(px,py,C_grid,trial,r,Rx,Ry,Rr,saving_path,start=True,fig_save=False): 
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    contour = ax.plot_trisurf(px,py,C_grid,cmap="rainbow")
+    circle = plt.Circle((0,0),r,fill=False,color='b')
+    ax.add_patch(circle)
+    art3d.pathpatch_2d_to_3d(circle,z=0,zdir='z')
+    platform_circle = plt.Circle((Rx,Ry),Rr,fill=True,color='green')
+    ax.add_patch(platform_circle)
+    art3d.pathpatch_2d_to_3d(platform_circle,z=0.001,zdir='z')
+    if start:
+        ax.set_zlim(0,1)
     else:
-        fig,ax = plt.subplots()
-        contour = ax.tricontourf(px,py,z,cmap="rainbow")
-        circle = plt.Circle((0,0),r,fill=False,color='r')
-        ax.add_patch(circle)
-        platform_circle = plt.Circle((Rx,Ry),Rr,fill=True,color='blue')
-        ax.add_patch(platform_circle)
+        contour = ax.tricontourf(px,py,C_grid,cmap="rainbow", offset=0)
+        ax.set_zlim(0,np.max(C_grid))
+    fig.suptitle('C(p) at trial {}'.format(trial))
     fig.colorbar(contour)
     if fig_save:
         if start:
@@ -104,29 +88,18 @@ def contour_plot(px,py,z,r,Rx,Ry,Rr,saving_path,start=True,cont=True,fig_save=Fa
             fig.savefig(saving_path+"/Cp_end.png")
     plt.show()
 
-def quiver_plot(place_cells,z,Rx,Ry,Rr): 
-    fig,ax = plt.subplots()
-    theta = np.outer(np.arange(8)*np.pi/4,np.ones(len(place_cells)))
-    x,y = get_a(place_cells,place_cells[:,0],place_cells[:,1],z,sigma)*np.array([np.sin(theta),np.cos(theta)])
-    ax.quiver(place_cells[:,0],place_cells[:,1],np.sum(x,axis=0),np.sum(y,axis=0),color='black')
-    circle = plt.Circle((0,0),r,fill=False,color='r')
-    ax.add_patch(circle)
-    platform_circle = plt.Circle((Rx,Ry),Rr,fill=True,color='blue')
-    ax.add_patch(platform_circle)
-    plt.show()
-
 def path_plot(p_path,trial,place_cells,space_grid,w,z,t,i,r,Rx,Ry,Rr,sigma,saving_path,plot_path=True,save_fig=False):
     fig,ax = plt.subplots() 
-    platform_circle = plt.Circle((Rx,Ry),Rr,fill=False,color='r') 
-    ax.add_patch(platform_circle) 
     space_circle = plt.Circle((0,0),r,fill=False,color='b') 
     ax.add_patch(space_circle) 
+    platform_circle = plt.Circle((Rx,Ry),Rr,fill=True,color='green') 
+    ax.add_patch(platform_circle) 
     if plot_path:
         ax.plot(p_path[t+1:i,0],p_path[t+1:i,1],color='black') 
     contour = ax.tricontourf(space_grid[:,0],space_grid[:,1],get_C(place_cells,space_grid[:,0],space_grid[:,1],w,sigma),cmap="rainbow")
     theta = np.outer(np.arange(8)*np.pi/4,np.ones(len(place_cells)))
     x,y = get_a(place_cells,place_cells[:,0],place_cells[:,1],z,sigma)*np.array([np.sin(theta),np.cos(theta)])
-    ax.quiver(place_cells[:,0],place_cells[:,1],np.sum(x,axis=0),np.sum(y,axis=0),color='r')
+    ax.quiver(place_cells[:,0],place_cells[:,1],np.sum(x,axis=0),np.sum(y,axis=0),color='red')
     ax.set_title('trial {}, iteration {}'.format(trial,i+1)) 
     ax.set_xlabel('x')
     ax.set_ylabel('y')
@@ -140,13 +113,14 @@ def rodent_swim(place_cells,space_grid,w,z,T,gamma,Rx,Ry,Rr,kw,kz,sigma,saving_p
     p_start = p_start_x[np.where(np.abs(p_start_x[:,1])==np.min(np.abs(p_start_x[:,1])))][0]
     p = p_start.copy()
     p_path = np.zeros([T,2])
+    t_platform = []
     p_path[0] = p
     trial = 1
     t = 0
-    iterations = trange(1,T,desc="trial {}".format(trial))
     count = 0 
+    iterations = trange(1,T,desc="trial {}".format(trial))
     C_grid = get_C(place_cells,space_grid[:,0],space_grid[:,1],w,sigma)
-    contour_plot(space_grid[:,0],space_grid[:,1],C_grid,r,Rx,Ry,Rr,saving_path,start=True,cont=True,fig_save=save_figs,D3=True)
+    surface_plot(space_grid[:,0],space_grid[:,1],C_grid,0,r,Rx,Ry,Rr,saving_path,start=True,fig_save=save_figs)
     for i in iterations:
         neighbours = get_neighbours(p,space_grid[:,0],space_grid[:,1])
         a = get_a(place_cells,p[0],p[1],z,sigma)*(neighbours[:,0]*0+1)
@@ -168,13 +142,10 @@ def rodent_swim(place_cells,space_grid,w,z,T,gamma,Rx,Ry,Rr,kw,kz,sigma,saving_p
         g = np.zeros([8,N])
         g[direction,:] = 1
         dz = delta*firing_rate*g
-        w += kw*dw
-        z += kz*dz
-        if i+1 in [100,200,500,1000]:
-            path_plot(p_path,trial,place_cells,space_grid,w,z,t,i,r,Rx,Ry,Rr,sigma,saving_path,plot_path=True,save_fig=save_figs)
         if R==1:
-            if trial in [2,10,100]:
+            if trial in [1,2,5,10,100]:
                 path_plot(p_path,trial,place_cells,space_grid,w,z,t,i,r,Rx,Ry,Rr,sigma,saving_path,plot_path=True,save_fig=save_figs)
+            t_platform.append(i)
             p = p_start.copy() 
             t = i
             trial += 1
@@ -187,10 +158,11 @@ def rodent_swim(place_cells,space_grid,w,z,T,gamma,Rx,Ry,Rr,kw,kz,sigma,saving_p
             p = p_start.copy()
             count = 0
             t = i
+        w += kw*dw
+        z += kz*dz
     C_grid = get_C(place_cells,space_grid[:,0],space_grid[:,1],w,sigma)
     path_plot(p_path,trial,place_cells,space_grid,w,z,t,i,r,Rx,Ry,Rr,sigma,saving_path,plot_path=False,save_fig=save_figs)
-    contour_plot(space_grid[:,0],space_grid[:,1],C_grid,r,Rx,Ry,Rr,saving_path,start=False,cont=True,fig_save=save_figs,D3=True)
-    return w,z
+    surface_plot(space_grid[:,0],space_grid[:,1],C_grid,trial,r,Rx,Ry,Rr,saving_path,start=False,fig_save=save_figs)
 
 r = 2
 n = 493 # approximately  points
@@ -199,14 +171,15 @@ sigma = 0.4
 gamma = 0.9
 kw = 0.1 # is learning rate for w and z
 kz = 0.1
-Rx,Ry,Rr = -0.5,0.5,0.2
+Rx,Ry,Rr = -0.5,0.5,0.1
 place_cells = create_circle(n,r,T)
 space_grid = create_circle(n*2,r,include_border=True)
 N = len(place_cells) # there are exactly N place_cells
-w0 = np.ones(N)*0.0001
-z0 = np.ones([8,N])*0.0001
+
+w0 = np.random.normal(0,0.001,size=N)
+z0 = np.random.normal(0,0.001,size=[8,N])
 
 save_figs = False 
 saving_path = "/Users/samsuidman/Desktop/neurophysics/advanced_computational_neuroscience/Week 5 Take Home"
-w,z = rodent_swim(place_cells,space_grid,w0,z0,T,gamma,Rx,Ry,Rr,kw,kz,sigma,saving_path,save_figs=save_figs)
+rodent_swim(place_cells,space_grid,w0,z0,T,gamma,Rx,Ry,Rr,kw,kz,sigma,saving_path,save_figs=save_figs)
 
