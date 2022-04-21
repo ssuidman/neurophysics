@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# data = np.loadtxt("/Users/samsuidman/Desktop/neurophysics/advanced_computational_neuroscience/Week 3 Take Home/salamander_data.txt")
+# data = np.loadtxt("/Users/samsuidman/Desktop/neurophysics/advanced_computational_neuroscience/Bert Kappen/Week 3 Take Home/salamander_data.txt")
 
 s_all = data.reshape(160,297,953) # s_all[neurons,experiments,time] gives for all neurons all experiments with all timestamps
 learning_rate_w = 0.5 # learning rate for w and theta

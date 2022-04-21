@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import trange
+from tqdm import trange,tqdm
 from scipy.sparse.csgraph import dijkstra
+from scipy.linalg import circulant
 import itertools
 
 # problem 2a
@@ -33,7 +34,10 @@ def problem_2b(n,printen,plotten):
         return A
 
 def problem_2c(n,k,printen):
-    A = np.array([[1 if i!=j and (np.abs(i-j)<=int(k/2) or np.abs(i-j)>=np.abs(n-int(k/2))) else 0 for i in range(n)] for j in trange(n)])
+    A_array = np.zeros(n) # the first row that forms the circulant matrix 
+    A_array[-int(k/2):] = 1 
+    A_array[1:int(k/2)+1] = 1
+    A = np.transpose(circulant(A_array)) # create a circulant matrix from the array and transpose it
     if printen:
         print(A)
     return A
@@ -61,65 +65,53 @@ def problem_2d(A,p,printen):
     return A
 
 def problem_2e(A): 
-    for i in trange(n): # look at each node
-        neighbours = np.where(A[i]==1)[0] # get all neighbours
+    n = len(A)
+    C_nodes = np.zeros(n)
+    for i in range(n): # look at each node
+        neighbours = np.nonzero(A[i])[0] # get all neighbours
         neighbours_combinations = np.array(list(itertools.combinations(neighbours,2))) # get all combinations of neighbours
         if len(neighbours_combinations)!=0: # look if there are more than 2 neighbours
             triangles = A[neighbours_combinations[:,0],neighbours_combinations[:,1]] # get the values of the combinations of neighbours where a 1 means a connection (=triangle) and a 0 not
             C_node = np.sum(triangles)/neighbours_combinations.shape[0] # get the local cluster index
         else: # this is the case if there are less than 2 neighbours
             C_node = 0 # set C_node to 0 if it has only 1 neighbours
-    C = np.mean(C_node) # get the average local cluster index
+        C_nodes[i] = C_node
+    C = np.mean(C_nodes) # get the average local cluster index
     d_matrix = dijkstra(A) # make shortest path matrix via Dijkstra algorithm
-    d = np.mean(d_matrix) # get the mean path length
-    return C,d
+    d_matrix = np.where(d_matrix==np.inf,np.nan,d_matrix)
+    d = np.nanmean(d_matrix) # get the mean path length
+    return C_nodes,C,d
 
-A1 = problem_2a(n=30,m=100,printen=False,plotten=False)
-A2 = problem_2b(n=30,printen=False,plotten=False)
-A3 = problem_2c(n=14,k=4,printen=False)
-A4 = problem_2d(A=A3.copy(),p=0.2,printen=False)
-C,d = problem_2e(A=A4.copy())
+def problem_2f(n,T,k_array):
+    probs = 1/10**np.linspace(0,5,T)[::-1]
+    C_nodes = np.zeros([len(k_array),T,n])
+    C = np.zeros([len(k_array),T])
+    d = np.zeros([len(k_array),T])
 
+    fig,ax = plt.subplots(ncols=2)
+    for i,k in enumerate(k_array):
+        print('k={}'.format(k))
+        A_f = problem_2c(n=n,k=k,printen=False)
+        for j,prob in enumerate(tqdm(probs)): 
+            A = problem_2d(A=A_f.copy(),p=prob,printen=False)
+            C_nodes[i,j],C[i,j],d[i,j] = problem_2e(A=A)
+        
+        ax[0].plot(probs,C[i]/C[i,0],color=plt.cm.hot(k*10))
+        ax[0].plot(probs,d[i]/d[i,0],color=plt.cm.gray(k*10))
+        ax[0].set_xscale('log')
+        ax[0].set_xlabel('Rewiring probability')
+        ax[0].set_ylabel('Cp/C0 and Lp/L0')
 
-############## OPDRACHT 3 ###################
-# Define "real" adjacency matrix that we're trying to estimate
-n = 100
-mu = np.zeros(n)
-a = np.random.rand(n) # arbitrary example
-sigma = np.outer(a,a) # "real" covariance matrix
-h = 0.2 # threshold
-A = np.where(sigma>h,1,0)
+        ax[1].plot(probs,(C[i]/C[i,0])/(d[i]/d[i,0]),color=plt.cm.hot(k*10))
+        ax[1].set_xlabel('Rewiring probability')
+        ax[1].set_ylabel('(Cp/C0) / (Lp/L0)')
+        ax[1].set_xscale('log')
+    fig.tight_layout()
+    plt.show()
 
-# Generate samples from multivariate normal distribution
-n_samples = 10 
-n_trials = 100 
-err = 0 
-for trial in range(n_trials):
-    x = np.random.multivariate_normal(mu,sigma,n_samples) # Sample from distribution
-    sigma_est = np.cov(x,rowvar=False) # Estimate the covariance matrix
-    A_est = np.where(sigma_est>h,1,0) # Threshold covariance matrix to estimate adjacency matrix
-    err += np.sum(np.where(A==A_est,0,1))
-
-# Plot results
-plt.figure(1)
-plt.imshow(sigma)
-plt.colorbar()
-plt.title('Covariance matrix')
-
-plt.figure(2)
-plt.imshow(A)
-plt.colorbar()
-plt.title('Adjacency matrix')
-
-plt.figure(3)
-plt.imshow(sigma_est)
-plt.colorbar()
-plt.title('covariance matrix (estimated)')
-
-plt.figure(4)
-plt.imshow(A_est)
-plt.colorbar()
-plt.title('Adjacency matrix (estimated)')
-plt.show()
-
-print('Probability of correctly estimating a particular entry in the adjacency matrix: {}'.format(1 - err/n_trials/n**2))
+A_a = problem_2a(n=30,m=100,printen=False,plotten=False)
+A_b = problem_2b(n=30,printen=False,plotten=False)
+A_c = problem_2c(n=500,k=10,printen=False)
+A_d = problem_2d(A=A_c.copy(),p=0.05,printen=False)
+C_nodes_e,C_e,d_e = problem_2e(A=A_d)
+problem_2f(n=1000,T=100,k_array=[3,5,10,12,15,20])

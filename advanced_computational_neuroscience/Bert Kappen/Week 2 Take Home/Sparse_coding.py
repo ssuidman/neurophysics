@@ -16,7 +16,7 @@ if DATA == 'pixels':
     lamda = 0.08    
 
 if DATA == 'natural':
-    img = io.imread('/Users/samsuidman/Desktop/neurophysics/advanced_computational_neuroscience/Week 2 Take Home/sampleMerry_0011_Lasalle.jpeg')
+    img = io.imread('/Users/samsuidman/Desktop/neurophysics/advanced_computational_neuroscience/Bert Kappen/Week 2 Take Home/sampleMerry_0011_Lasalle.jpeg')
     g = color.rgb2gray(img)
 #     plt.imshow(g,cmap='gray')
 #     plt.savefig('test.png')
