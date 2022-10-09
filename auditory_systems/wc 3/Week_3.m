@@ -91,6 +91,8 @@ title('DTF');
 
 subplot(2,1,2);
 imagesc(f_513,el,DTF');
+colorbar; 
+colormap jet; 
 caxis([-15 10]);
 set(gca,'YDir','normal');  
 xlabel('f(Hz)');
