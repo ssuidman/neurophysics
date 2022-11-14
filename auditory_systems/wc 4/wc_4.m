@@ -1,4 +1,5 @@
-load('test_data.mat', 'Data');
+% load('test_data.mat', 'Data');
+load('NH-0117-22-10-14-data.mat', 'Data');
 
 %% test figure
 stimaz = Data(:,1); % stimulus azimuth in first column
@@ -122,6 +123,22 @@ offset_el_HP = B_el_HP.beta(1);
 B_el_LP = regstats(resel_LP,stimel_LP,'linear');
 slope_el_LP = B_el_LP.beta(2);
 offset_el_LP = B_el_LP.beta(1);
+
+display(slope_az_BB);
+display(slope_az_HP);
+display(slope_az_LP);
+
+display(slope_el_BB);
+display(slope_el_HP);
+display(slope_el_LP);
+
+display(offset_az_BB);
+display(offset_az_HP);
+display(offset_az_LP);
+
+display(offset_el_BB);
+display(offset_el_HP);
+display(offset_el_LP);
 
 
 
