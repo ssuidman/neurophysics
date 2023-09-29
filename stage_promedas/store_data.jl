@@ -1,15 +1,38 @@
-using CSV
-using DataFrames
+using JLD2
+using MAT
 
-data_vector = DataFrame(previn=previn,pfminneg=pfminneg,actualdiseases=actualdiseases)
-data_matrix = DataFrame(pfmin, :auto)
-CSV.write("data_vectors.csv",data_vector)
-CSV.write("data_matrix.csv",data_matrix)
+# Write variables to jld-file 
+jldopen("variables/data.jld","w") do file
+    file["previn"] = previn
+    file["pfminneg"] = pfminneg
+    file["actualdiseases"] = actualdiseases
+    file["pfmin"] = pfmin
+end
 
-file_vector = CSV.File("data_vectors.csv")
-file_matrix = CSV.File("data_matrix.csv")
-previn = file_vector.previn
-pfminneg = file_vector.pfminneg
-actualdiseases = file_vector.actualdiseases
-pfmin = Matrix(DataFrame(file_matrix))
-# previn = file.previn
+# Retrieve variables from jld-file 
+jldopen("variables/data.jld", "r") do file
+    global previn = file["previn"]
+    global pfminneg = file["pfminneg"] 
+    global actualdiseases = file["actualdiseases"] 
+    global pfmin = file["pfmin"] 
+end
+
+# Write variables to mat-file
+matfile = matopen("/Users/sam/Documents/MATLAB/Wim/variables_julia/test.mat","w")
+write(matfile,"previn",previn)
+write(matfile,"pfminneg",pfminneg)
+write(matfile,"actualdiseases",actualdiseases)
+write(matfile,"pfmin",pfmin)
+close(matfile)
+
+# Retrive variables from mat-file 
+matfile = matopen("/Users/sam/Documents/MATLAB/Wim/variables_julia/test.mat", "r")
+previn = read(matfile, "previn")
+pfminneg = read(matfile, "pfminneg")
+actualdiseases = read(matfile, "actualdiseases")
+pfmin = read(matfile, "pfmin")
+close(matfile)
+
+
+
+

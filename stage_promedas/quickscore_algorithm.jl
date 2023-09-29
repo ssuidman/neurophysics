@@ -7,10 +7,19 @@
 # posterior =  [P(d_1=1|F+,F-),... P(d_n=1|F+,F-)]
 # pfpluspd = [p(F+,F-), P(F+,F-|d_1=1)p(d_1=1),..., P(F+,F-|d_n=1)p(d_n=1)]
 # pfplus = [ p(F+,F-), P(F+,F-|d_1=1),..., P(F+,F-|d_n=1) ]
-using ProgressBars
 
-function quickscore(previn, pfmin, pfminneg,binary)
+
+# pfplus_flip, posterior_flip, dt_flip = quickscore(previn, pfmin, pfminneg,false) 
+# pfplus_binary, posterior_binary, dt_binary = quickscore(previn, pfmin, pfminneg,true) # not necessary for the comparison 
+
+function add_pfplus(pfplus,myset,pfmin,prevminneg)
+    pfplus .+= ((-1)^length(myset)) .* exp.(sum(broadcast(log, 1e-50 .+ (prod(pfmin[myset, :], dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
+    return pfplus 
+end
+
+function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::Vector{Float64}, binary::Bool)
     m, n = !isempty(pfmin) ? size(pfmin) : (0, length(previn)) # m number of postests. n number of diags. if size(postest) is 0, then we set m=0 `` 
+    print("m=$m",'\n')
     prev = repeat(previn',inner=(n+1,1)) # copies of prevalences
     for i in 1:n prev[i+1,i]=1 end # set the (i+1,i) entry 1 to condition on d_i=1,  etc. 
     prevend = vcat(1,previn) # prevend are the prevalences 1, P(d_1=1),... P(d_n=1) and is needed to multiply at the end
@@ -20,18 +29,24 @@ function quickscore(previn, pfmin, pfminneg,binary)
     myset = 0
     t1 = time()
     if binary
-        for i in ProgressBar(0:(2^m-1)) # iterate over 2^m possibilities 
+        print("Binary\n")
+        for i in 0:(2^m-1) # iterate over 2^m possibilities 
             v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
             myset = findall(v.==1) # find places of the 1-elements
             if length(myset)==0
-                pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ prevminneg .+ (1 .- prev)), dims=2))
+                # pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ prevminneg .+ (1 .- prev)), dims=2))
             elseif length(myset)==1
-                pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev)), dims=2))
+                # pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev)), dims=2))
+                print(v,'\n')
             else
                 pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
+                # pfplus .+= ((-1)^length(myset)) .* exp.(sum(broadcast(log, 1e-50 .+ (prod(pfmin[myset, :], dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
+                # matrix = BigFloat.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)))
+                # pfplus .+= ((-1)^length(myset)) .* prod(matrix,dims=2)
             end     
         end 
     else
+        print("flip\n")
         ready = false 
         v = zeros(Int,m) 
         while !ready
@@ -40,10 +55,13 @@ function quickscore(previn, pfmin, pfminneg,binary)
                 pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ prevminneg .+ (1 .- prev)), dims=2))
             elseif length(myset)==1
                 pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev)), dims=2))
+                print(v,'\n')
             else
-                pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
+                pfplus = add_pfplus(pfplus,myset,pfmin,prevminneg)
+                # pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
+                # pfplus .+= ((-1)^length(myset)) .* exp.(sum(broadcast(log, 1e-50 .+ (prod(pfmin[myset, :], dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
             end
-    
+
             ready = true 
             for k = 1:m
                 v[k] += 1
@@ -67,6 +85,8 @@ function quickscore(previn, pfmin, pfminneg,binary)
     
     return pfplus, posterior, dt 
 end 
+
+
 
 # final results
 # pfplus is p(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1),

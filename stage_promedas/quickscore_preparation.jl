@@ -1,10 +1,9 @@
 # To use the function, run the following lines: 
-# using Random
 # include("quickscore_preparation.jl")
 # previn,pfmin,pfminneg = quickscore_preparation()
 using Random
 
-function quickscore_preparation(n_disease=100,n_test=30,expected_number_of_diseases=3,sparseness=0.5)
+function quickscore_preparation(n_disease=100,n_test=30,expected_number_of_diseases=3,sparseness=0.5,m_wanted=1)
     # the input parameters are 'typical number of diags', 'number of findings', 'typical number of diags', 'connection density'
 
     # the model
@@ -18,7 +17,8 @@ function quickscore_preparation(n_disease=100,n_test=30,expected_number_of_disea
     # accept if the number of diseases and the number of positive findings is OK, else try again.
     actualdiags, postest, negtest, ndiags,m,testresults = 0,0,0,0,0,0 #setting some variables to use outside the loop too 
 
-    while (ndiags==0) | !(m>5 && m<15) # changing the m range, could change the amount postest/negtest which both should never be empty 
+    # while (ndiags==0) | !(m>5 && m<15) # changing the m range, could change the amount postest/negtest which both should never be empty 
+    while (ndiags==0) | !(m==m_wanted) # changing the m range, could change the amount postest/negtest which both should never be empty 
         actualdiags = findall(rand(n_disease) .< prev)  # generate diseases and get the y value out of a 1D-array of cartesian coordinates
         ndiags = length(actualdiags) 
 
