@@ -1,11 +1,4 @@
-using PrettyTables
-using CSV
-using DataFrames
-using JLD2
-using MAT
-using Plots
-using Profile
-using ProfileView
+include("packages.jl")
 include("quickscore_preparation.jl")
 include("quickscore_algorithm.jl")
 
@@ -53,11 +46,12 @@ include("quickscore_algorithm.jl")
 # end
 
 # LOAD SOME RANDOM VARIABLES previn,pfminneg,pfmin FOR A CERTAIN m=19 and run the quickscore
-file = jldopen("variables/m_19.jld", "r")
+file = jldopen("variables/m_20.jld", "r")
 previn = file["previn"]
 pfminneg = file["pfminneg"]
 pfmin = file["pfmin"]
 close(file)
+# @code_warntype quickscore(previn, pfmin, pfminneg, false)
 pfplus,posterior,dt = quickscore(previn, pfmin, pfminneg,false) 
 # # THIS LINE PRINTS OUT WHAT IT IS PRECOMPILING WHEN RUNNING IN THE TERMINAL 
 # julia --trace-compile=stderr main.jl 
