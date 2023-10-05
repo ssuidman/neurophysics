@@ -9,3 +9,4 @@ using PProf
 using ProfileView
 using BenchmarkTools
 using IJulia
+using Random

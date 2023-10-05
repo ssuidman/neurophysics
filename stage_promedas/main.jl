@@ -45,16 +45,16 @@ include("quickscore_algorithm.jl")
 #     end
 # end
 
-# LOAD SOME RANDOM VARIABLES previn,pfminneg,pfmin FOR A CERTAIN m=19 and run the quickscore
-file = jldopen("variables/m_20.jld", "r")
-previn = file["previn"]
-pfminneg = file["pfminneg"]
-pfmin = file["pfmin"]
-close(file)
-# @code_warntype quickscore(previn, pfmin, pfminneg, false)
-pfplus,posterior,dt = quickscore(previn, pfmin, pfminneg,false) 
-# # THIS LINE PRINTS OUT WHAT IT IS PRECOMPILING WHEN RUNNING IN THE TERMINAL 
-# julia --trace-compile=stderr main.jl 
+
+
+# LOAD SOME RANDOM VARIABLES previn,pfminneg,pfmin FOR A CERTAIN m=17 and run the quickscore
+# file = jldopen("variables/m_17.jld", "r")
+# previn = file["previn"]
+# pfminneg = file["pfminneg"]
+# pfmin = file["pfmin"]
+# close(file)
+# pfplus,posterior,dt = quickscore(previn, pfmin, pfminneg,false) 
+
 
 # RUN THE MATLAB QUICKSCORE ALGORITHM IN THE FILE "run_quickscore_1_22.m"
 
