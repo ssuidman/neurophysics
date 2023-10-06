@@ -10,3 +10,5 @@ using ProfileView
 using BenchmarkTools
 using IJulia
 using Random
+using Octavian
+using LoopVectorization
