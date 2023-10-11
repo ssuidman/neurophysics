@@ -12,3 +12,5 @@ using IJulia
 using Random
 using Octavian
 using LoopVectorization
+using Printf
+using Random

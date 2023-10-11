@@ -59,16 +59,9 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
                 push!(dt_array,t1a-t1)
                 print("$(myset[1]-1): $v --> $(t1a-t1) \n")
             else 
-                # pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
-                
-                # pfplus .+= ((-1)^length(myset::Vector{Int64})) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset::Vector{Int64}, :],dims=1) .* prevminneg::Matrix{Float64} .+ (1 .- prev))), dims=2))
-                                
-                pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
-                
-                # pfplus .+= ((-1)^length(myset)) .* exp.(sum(broadcast(log, 1e-50 .+ (prod(pfmin[myset, :], dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
-
-                # matrix = BigFloat.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)))
-                # pfplus .+= ((-1)^length(myset)) .* prod(matrix,dims=2)
+                pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
+                # pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
+                # matrix = BigFloat.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))); pfplus .+= ((-1)^length(myset)) .* prod(matrix,dims=2)
             end
 
             ready = true 
@@ -87,7 +80,7 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
         end        
         t2 = time()
         push!(dt_array,t2-t1)
-        print("$(m+1): $v --> $(t2-t1) \n")
+        print("$m: $v --> $(t2-t1) \n")
         dt = t2 - t1 
     end     
 

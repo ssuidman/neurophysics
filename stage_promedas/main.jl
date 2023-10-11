@@ -2,6 +2,7 @@ include("packages.jl")
 include("quickscore_preparation.jl")
 include("quickscore_algorithm.jl")
 
+# matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
 
 
 # # STORING THE VARIABLES IN JL-FILES AND MAT-FILES, DO NOT RUN THIS ONE OFTEN, BECAUSE PREVIN,PFMINNEG,PFMIN THEN CHANGE!!!
@@ -17,7 +18,7 @@ include("quickscore_algorithm.jl")
 #     end
     
 #     # Write variables to mat-file
-#     matfile = matopen("/Users/sam/Documents/MATLAB/Wim/variables_julia/m_$i.mat","w")
+#     matfile = matopen(joinpath(matlab_dir,"variables_julia/m_$i.mat"),"w")
 #     write(matfile,"previn",previn)
 #     write(matfile,"pfminneg",pfminneg)
 #     write(matfile,"actualdiseases",actualdiseases)
@@ -75,7 +76,7 @@ include("quickscore_algorithm.jl")
 #     push!(posterior_julia,posterior)
 #     close(jlfile)
     
-#     matfile = matopen("/Users/sam/Documents/MATLAB/Wim/variables_julia/m_$i.mat", "r")
+#     matfile = matopen(joinpath(matlab_dir,"variables_julia/m_$i.mat"),"r")
 #     dt = read(matfile, "timep")
 #     push!(dt_matlab,dt)
 #     posterior = vec(read(matfile, "posterior"))
