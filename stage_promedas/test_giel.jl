@@ -8,8 +8,8 @@ function main(with_loop)
     n=100
     x=rand([-1 1],M,n)      # inputs x(mu,i)=-1,1 mu=1:M, i=1:n
     y=rand([-1 1],M,1)        # output y(mu)=-1,1
-    # z=x.*(y*ones(Int, 1,n))
-    z=x.*(y*ones(1,n))
+    z=x.*(y*ones(Int, 1,n))
+    # z=x.*(y*ones(1,n))
     beta=2
     dw_max=1
     iter_max=1e3
@@ -27,9 +27,9 @@ function main(with_loop)
             c=zeros(1,M)
             for i=1:M
                 for j=1:n
-                    c[i]+=z[i,j]*m[j]
+                    # c[i]+=z[i,j]*m[j]
                     # @inbounds removes array bound checks, only use it if you're sure that you won't go out of bounds
-                    # @inbounds c[i]+=z[i,j]*m[j]
+                    @inbounds c[i]+=z[i,j]*m[j]
                 end
             end
         else
