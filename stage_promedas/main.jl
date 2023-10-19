@@ -40,9 +40,9 @@ include("quickscore_algorithm.jl")
 #     pfplus,posterior,dt = quickscore(previn, pfmin, pfminneg,false) 
 
 #     jldopen("variables/m_$i.jld","a") do file # make sure that this part has not yet run, otherwise it gives an error that parts of the file already exist
-#         file["pfplus"] = pfplus 
+#         # file["pfplus"] = pfplus 
 #         file["posterior"] = posterior
-#         file["dt"] = dt
+#         # file["dt"] = dt
 #     end
 # end
 
