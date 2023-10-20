@@ -191,26 +191,26 @@ end
 println("\n################################### Posterior comparison (using prod1[pfmin]) ###################################")
 pretty_table(hcat((posterior_prod_julia - posterior_log_julia),(posterior_prod_matlab-posterior_log_matlab),(posterior_prod_matlab - posterior_prod_julia),(posterior_log_matlab - posterior_log_julia)),header=["Julia prod  -  Julia log","MATLAB prod  -  MATLAB log","MATLAB prod  -  Julia prod","MATLAB log  -  Julia log"])
 
-# We kijken nu naar de belangrijkste regels
+# We proberen nu pfplus_matrix te maken in Julia en Matlab om te kijken waar het nog anders is. 
 pfplus_matrix_julia, pfplus_julia = zeros((2^18, n+1)), zeros(n+1)
 t1 = time(); for i in 0:(2^18-1) # iterate over 2^m possibilities 
     v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
     myset = findall(v.==1) # find places of the 1-elements
     if length(myset)==0
-        pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ prevminneg .+ (1 .- prev), dims=2)
+        pfplus_julia .+= ((-1)^length(myset)) .* prod(1e-50 .+ prevminneg .+ (1 .- prev), dims=2)
         pfplus_matrix_julia[i+1,:] = ((-1)^length(myset)) .* prod(1e-50 .+ prevminneg .+ (1 .- prev), dims=2)
     elseif length(myset)==1
-        pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2)
+        pfplus_julia .+= ((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2)
         pfplus_matrix_julia[i+1,:] = ((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2)
         t2 = time(); print("$(myset[1]-1): $v --> $(t2-t1) \n")
     else
-        pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
+        pfplus_julia .+= ((-1)^length(myset)) .* prod(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
         pfplus_matrix_julia[i+1,:] = ((-1)^length(myset)) .* prod(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
     end     
 end; 
-pfpluspd = pfplus.*prevend
+pfpluspd = pfplus_julia.*prevend
 posterior = pfpluspd[2:end] / pfpluspd[1] 
-pfplus2 = sum(pfplus_matrix,dims=1)'
+pfplus2 = sum(pfplus_matrix_julia,dims=1)'
 pfpluspd2 = pfplus2.*prevend
 posterior2 = pfpluspd2[2:end] / pfpluspd2[1] 
 
@@ -222,7 +222,6 @@ x_matlab = [0.06549453138050265188 0.01708775786397482080 0.00188666328496350376
 (pfplus_matrix_matlab .- pfplus_matrix_julia)
 pfplus_matrix_matlab
 
-
 pfplus_matlab'
 sum(pfplus_matrix_matlab,dims=1)
-pfplus'
+

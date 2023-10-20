@@ -39,7 +39,7 @@ function quickscore_preparation(n_disease=100,n_test=30,expected_number_of_disea
     pfmin = 1 .- sens 
     pfminneg = vec( prod(1 .- sensneg, dims=1) )  # be careful with the dimensions: scalar result prod(1 - sensneg) for singleton neg test is wrong.
 
-    return prev, pfmin, pfminneg, actualdiseases
+    return prev, pfmin, pfminneg, actualdiseases, sens, sensneg
 end 
 
 # # Here it goes into quickscore.
