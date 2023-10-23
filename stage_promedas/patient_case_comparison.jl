@@ -3,92 +3,116 @@ include("quickscore_preparation.jl")
 include("quickscore_algorithm.jl")
 include("useful_functions.jl")
 
-previn, pfmin, pfminneg, actualdiseases, sens, sensneg = quickscore_preparation() 
-sensneg 
-prod(1 .- sensneg, dims=1)[1,:] 
+# previn, pfmin, pfminneg, actualdiseases, sens, sensneg = quickscore_preparation() 
+# sensneg 
+# prod(1 .- sensneg, dims=1)[1,:] 
 
 matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
-# patient = Dict()
 matfile = matopen(joinpath(matlab_dir,"variables_julia/patient_cases.mat"),"r")
     patient_matlab = read(matfile, "patient_to_julia")
-    binary_cases = read(matfile, "binary_cases")[1,:]
-    # diagtest_matlab = read(matfile, "diagtest_to_julia")
+    test_matlab = read(matfile, "test_to_julia")
+    diagn = read(matfile,"diagn")[1,:]
+    diagtest_matlab = read(matfile, "diagtest_to_julia")
+    prev = read(matfile, "prev")[1,:]
+    belowSens = read(matfile, "belowSens")
+    aboveSens = read(matfile, "aboveSens")
+    restSens = read(matfile, "restSens")
+    malemult = read(matfile, "malemult")[1,:]
+    femalemult = read(matfile, "femalemult")[1,:]
+    agemult_matlab = read(matfile, "agemult_to_julia")
+    parents_matlab = read(matfile, "parents")[1,:]
+    link_ext = read(matfile, "link_ext")
 close(matfile)
 
-index_patient = findall(sizeof.(patient_matlab) .== 0)
-patient_matlab[index_patient] .= nothing
-patient_array = dropdims(patient_matlab,dims=2)
-patient_dict = Dict("Patient" => 1:size(patient_matlab,3), "age" => patient_array[1, :], "gender" => patient_array[2, :], "test" => patient_array[3, :], "tvalue" => patient_array[4, :], "diag" => patient_array[5, :], "dvalue" => patient_array[6, :], "cdiag" => patient_array[7, :], "ext" => patient_array[8, :], "evalue" => patient_array[9, :])
-patient_df = DataFrame(patient_dict)
-# patient_df[[306,307],[:Patient,:age,:cdiag]]
-# patient_df[binary_cases,:]
-patient_df[306,2]
-patient_df[305:307,:]
-patient = Patient[]
-
-for i=1:size(patient_df,1)
-    # print(i)
-    age = patient_df[i,"age"] 
-    gender = patient_df[i,"gender"]
-    test = patient_df[i,"test"]
-    tvalue = patient_df[i,"tvalue"]
-    diag = patient_df[i,"diag"]
-    dvalue = patient_df[i,"dvalue"]
-    cdiag = patient_df[i,"cdiag"]
-    ext = patient_df[i,"ext"]
-    evalue = patient_df[i,"evalue"]
-    println(typeof(age)," ",typeof(gender)," ",typeof(test)," ",typeof(tvalue)," ",typeof(diag)," ",typeof(dvalue)," ",typeof(cdiag)," ",typeof(evalue))
-    Patient(age,gender,test,tvalue,diag,dvalue,cdiag,evalue)
-    # push!(patient,Patient(age,gender,test,tvalue,diag,dvalue,cdiag,evalue))    
-    # Patient(age,gender,test,tvalue,diag,dvalue,cdiag,evalue)
+function patient_func(patient_matlab::Array{Any,3})
+    patient_dict = Dict{String, Vector{Any}}()
+    for i in axes(patient_matlab,3) 
+        age = sizeof(patient_matlab[1,1,i]) != 0 ? Int(patient_matlab[1,1,i]) : nothing
+        gender = sizeof(patient_matlab[2,1,i]) != 0 ? String(patient_matlab[2,1,i]) : nothing
+        test = sizeof(patient_matlab[3,1,i]) != 0 ? (typeof(patient_matlab[3,1,i]) == Matrix{Float64} ? Int.(patient_matlab[3,1,i][1,:]) : Int(patient_matlab[3,1,i])) : nothing
+        if !any(x -> typeof(x) == Matrix{Union{}}, patient_matlab[4,1,i])
+            tvalue = sizeof(patient_matlab[4,1,i]) != 0 ? String.(patient_matlab[4,1,i][1,:]) : nothing
+        else 
+            tvalue = String.(filter(item -> !(typeof(item) == Matrix{Union{}}), patient_matlab[4,1,i]))
+        end
+        diag = sizeof(patient_matlab[5,1,i]) != 0 ? (typeof(patient_matlab[5,1,i]) == Matrix{Float64} ? Int.(patient_matlab[5,1,i][1,:]) : Int(patient_matlab[5,1,i])) : nothing
+        dvalue = sizeof(patient_matlab[6,1,i]) != 0 ? String.(patient_matlab[6,1,i][1,:]) : nothing
+        cdiag = sizeof(patient_matlab[7,1,i]) != 0 ? (typeof(patient_matlab[7,1,i]) == Matrix{Float64} ? Int.(patient_matlab[7,1,i][1,:]) : Int(patient_matlab[7,1,i])) : nothing
+        ext = sizeof(patient_matlab[8,1,i]) != 0 ? (typeof(patient_matlab[8,1,i]) == Matrix{Float64} ? Int.(patient_matlab[8,1,i][1,:]) : Int(patient_matlab[8,1,i])) : nothing
+        evalue = sizeof(patient_matlab[9,1,i]) != 0 ? String.(patient_matlab[9,1,i][1,:]) : nothing
+        patient_dict["age"] = push!(get(patient_dict, "age", []), age)
+        patient_dict["gender"] = push!(get(patient_dict, "gender", []), gender)
+        patient_dict["test"] = push!(get(patient_dict, "test", []), test)
+        patient_dict["tvalue"] = push!(get(patient_dict, "tvalue", []), tvalue)
+        patient_dict["diag"] = push!(get(patient_dict, "diag", []), diag)
+        patient_dict["dvalue"] = push!(get(patient_dict, "dvalue", []), dvalue)
+        patient_dict["cdiag"] = push!(get(patient_dict, "cdiag", []), cdiag)
+        patient_dict["ext"] = push!(get(patient_dict, "ext", []), ext)
+        patient_dict["evalue"] = push!(get(patient_dict, "evalue", []), evalue)
+    end
+    patient = DataFrame(patient_dict)
+    return patient
 end
+patient = patient_func(patient_matlab)
 
 
-Patient(nothing,nothing,nothing,nothing,nothing,nothing,nothing,nothing,nothing)
-# patient_df
-patient_df[306,"evalue"]
-# age = 70
-# gender = 'M'
-# test = [3284, 3812, 796, 3235, 1420]
-# tvalue = ["true", "true", "true", "true", "true"]
-# diag = Int[]  # An empty array for diag
-# dvalue = String[]  # An empty array for dvalue
-# cdiag = [2577, 0, 0, 0, 0, 0]
-# ext = [2487, 1268]
-# evalue = ["true", "true"]
 
-patient_295 = 
-
-patient_matlab
-
-
-index_diagtest = findall(sizeof.(diagtest_matlab) .== 0)
-diagtest_matlab[index_diagtest] .= nothing
-# diagtest_dict = Dict("type" => spzeros(size(diagtest_matlab[1,:,:])), "mult" => spzeros(size(diagtest_matlab[2,:,:])), "sens" => spzeros(size(diagtest_matlab[3,:,:])))
-idx = findall(diagtest_matlab[1,:,:] .!= nothing)
-diagtest = spzeros(size(diagtest_matlab[1,:,:]))
-for i in idx
-    diagtest_dict[] = idx[i][1],idx[i][2]
-
+function diagtest_func(diagtest_matlab::Array{Any,3})
+    idx = findall(sizeof.(diagtest_matlab[1,:,:]) .!= 0)
+    diagtest = Array{Any}(nothing, size(diagtest_matlab,2), size(diagtest_matlab,3))
+    for i in idx
+        type = typeof(diagtest_matlab[1,i]) == Float64 ? [Int(diagtest_matlab[1,i])] : Int.(diagtest_matlab[1,i][1,:]) # gefikst
+        mult = sizeof(diagtest_matlab[2,i]) != 0 ? diagtest_matlab[2,i][1] : nothing
+        sens = sizeof(diagtest_matlab[3,i]) != 0 ? Vector(diagtest_matlab[3,i][1,:]) : nothing
+        diagtest[i] = Dict("type"=>type, "mult"=>mult, "sens"=>sens)
+    end
+    return diagtest
 end
-# for (i,j)
-# i
-diagtest_dict["type"]
-x[i] .= diagtest_matlab[1,i]
-diagtest_matlab[1,i]
-x[i]
-i
+diagtest = diagtest_func(diagtest_matlab)
+# diagtest[3421,919] #[3216,3997] [1634,3325] [2351,3470]
 
-x[i]
-index2[1][1]
 
-#####################################################################################################################################
-#####################################################################################################################################
-#####################################################################################################################################
 
-x[i]
-diagtest_matlab[1,i]
-x[i] .= diagtest_matlab[1,i]
-diagtest_matlab
+function test_func(test_matlab::Array{Any,3})
+    test_dict = Dict{String, Vector{Any}}()
+    for i in axes(test_matlab,3) 
+        gender = test_matlab[1,1,i]
+        name = test_matlab[2,1,i]
+        type = typeof(test_matlab[3,1,i]) == Float64 ? test_matlab[3,1,i] : test_matlab[3,1,i][1,:]
+        normal = sizeof(test_matlab[4,1,i]) != 0 ? test_matlab[4,1,i][1,:] : nothing
+        test_dict["gender"] = push!(get(test_dict, "gender", []), gender)
+        test_dict["name"] = push!(get(test_dict, "name", []), name)
+        test_dict["type"] = push!(get(test_dict, "type", []), type)
+        test_dict["normal"] = push!(get(test_dict, "normal", []), normal)
+    end
+    test = DataFrame(test_dict)
+    return test
+end
+test = test_func(test_matlab)
+
+
+
+function agemult_func(agemult_matlab::Array{Any,3})
+    agemult_array = copy(agemult_matlab[:,1,:]')
+    idx1 = sizeof.(agemult_matlab) .== 0
+    agemult_array[idx1[:,1,:]'] .= nothing
+    idx2 = (typeof.(agemult_array) .!= Float64) .&& (typeof.(agemult_array) .!= Nothing)
+    agemult_array[idx2] .= Vector{Vector{Float64}}(vec.(agemult_array[idx2]))
+    agemult = DataFrame(agemult_array,["low","high","mult"])
+    return agemult
+end
+agemult = agemult_func(agemult_matlab)
+# agemult[76:82,:]
+
+
+
+function parents_func(parents_matlab::Vector{Any})
+    parents = Vector{Any}(undef, 4011)
+    for i in axes(parents_matlab,1)
+        parents[i] = sizeof(parents_matlab[i]) != 0 ? (typeof(parents_matlab[i]) == Matrix{Float64} ? Int.(parents_matlab[i][:,1]) : Int(parents_matlab[i])) : nothing
+    end
+    return parents
+end
+parents = parents_func(parents_matlab)
 
 

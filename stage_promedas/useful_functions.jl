@@ -13,16 +13,4 @@ function prod1(x;dims=1)
     return result
 end
 
-struct Patient
-    age::Union{Int,Nothing}
-    gender::Union{String, Nothing}
-    test::Union{Array{Int},Nothing}
-    tvalue::Union{Array{Any},Nothing}
-    diag::Union{Array{Int},Nothing}
-    dvalue::Union{Array{Any},Nothing}
-    cdiag::Union{Vector{Int},Nothing}
-    ext::Union{Vector{Int},Nothing}
-    evalue::Union{Array{Any},Nothing}
-end
-
 
