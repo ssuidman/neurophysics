@@ -7,22 +7,6 @@ include("useful_functions.jl")
 # sensneg 
 # prod(1 .- sensneg, dims=1)[1,:] 
 
-matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
-matfile = matopen(joinpath(matlab_dir,"variables_julia/patient_cases.mat"),"r")
-    patient_matlab = read(matfile, "patient_to_julia")
-    test_matlab = read(matfile, "test_to_julia")
-    diagn = read(matfile,"diagn")[1,:]
-    diagtest_matlab = read(matfile, "diagtest_to_julia")
-    prev = read(matfile, "prev")[1,:]
-    belowSens = read(matfile, "belowSens")
-    aboveSens = read(matfile, "aboveSens")
-    restSens = read(matfile, "restSens")
-    malemult = read(matfile, "malemult")[1,:]
-    femalemult = read(matfile, "femalemult")[1,:]
-    agemult_matlab = read(matfile, "agemult_to_julia")
-    parents_matlab = read(matfile, "parents")[1,:]
-    link_ext = read(matfile, "link_ext")
-close(matfile)
 
 function patient_func(patient_matlab::Array{Any,3})
     patient_dict = Dict{String, Vector{Any}}()
@@ -53,7 +37,6 @@ function patient_func(patient_matlab::Array{Any,3})
     patient = DataFrame(patient_dict)
     return patient
 end
-patient = patient_func(patient_matlab)
 
 
 
@@ -68,8 +51,6 @@ function diagtest_func(diagtest_matlab::Array{Any,3})
     end
     return diagtest
 end
-diagtest = diagtest_func(diagtest_matlab)
-# diagtest[3421,919] #[3216,3997] [1634,3325] [2351,3470]
 
 
 
@@ -88,7 +69,6 @@ function test_func(test_matlab::Array{Any,3})
     test = DataFrame(test_dict)
     return test
 end
-test = test_func(test_matlab)
 
 
 
@@ -101,8 +81,6 @@ function agemult_func(agemult_matlab::Array{Any,3})
     agemult = DataFrame(agemult_array,["low","high","mult"])
     return agemult
 end
-agemult = agemult_func(agemult_matlab)
-# agemult[76:82,:]
 
 
 
@@ -113,6 +91,33 @@ function parents_func(parents_matlab::Vector{Any})
     end
     return parents
 end
-parents = parents_func(parents_matlab)
 
+
+
+function import_matlab_variables()
+    matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
+    matfile = matopen(joinpath(matlab_dir,"variables_julia/patient_cases.mat"),"r")
+        patient_matlab = read(matfile, "patient_to_julia")
+        test_matlab = read(matfile, "test_to_julia")
+        diagn = read(matfile,"diagn")[1,:]
+        diagtest_matlab = read(matfile, "diagtest_to_julia")
+        prev = read(matfile, "prev")[1,:]
+        belowSens = read(matfile, "belowSens")
+        aboveSens = read(matfile, "aboveSens")
+        restSens = read(matfile, "restSens")
+        malemult = read(matfile, "malemult")[1,:]
+        femalemult = read(matfile, "femalemult")[1,:]
+        agemult_matlab = read(matfile, "agemult_to_julia")
+        parents_matlab = read(matfile, "parents")[1,:]
+        link_ext = read(matfile, "link_ext")
+    close(matfile)
+
+    patient = patient_func(patient_matlab)
+    diagtest = diagtest_func(diagtest_matlab)
+    test = test_func(test_matlab)
+    agemult = agemult_func(agemult_matlab)
+    parents = parents_func(parents_matlab)
+    
+    return patient, test, diagn, diagtest, prev, belowSens, aboveSens, restSens, malemult, femalemult, agemult, parents, link_ext
+end
 

@@ -12,6 +12,8 @@
 # pfplus_binary, posterior_binary, dt_binary = quickscore(previn, pfmin, pfminneg,true) # not necessary for the comparison 
 include("useful_functions.jl")
 
+
+
 function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::Vector{Float64}, binary::Bool)
     m,n = !isempty(pfmin) ? size(pfmin) : (0, length(previn)) # m number of postests. n number of diags. if size(postest) is 0, then we set m=0 `` 
     print("m=$m",'\n')
@@ -51,11 +53,15 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
             myset = findall(v.==1) # find places of the 1-elements
             if length(myset)==0 
                 # pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ prevminneg .+ (1 .- prev)), dims=2))
-                pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ prevminneg .+ (1 .- prev), dims=2)
+                # pfplus .+= BigFloat.(((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ prevminneg .+ (1 .- prev)), dims=2)))
+                # pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ prevminneg .+ (1 .- prev), dims=2)
+                # pfplus .+= BigFloat.(((-1)^length(myset)) .* prod(1e-50 .+ prevminneg .+ (1 .- prev), dims=2))
                 i += 1
             elseif length(myset)==1 
                 # pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev)), dims=2))
-                pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2)
+                # pfplus .+= BigFloat.(((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev)), dims=2)))
+                # pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2)
+                # pfplus .+= BigFloat.(((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2))
                 i += 1
                 t1a = time()
                 push!(dt_array,t1a-t1)
@@ -65,7 +71,8 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
                 # pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
                 # pfplus .+= BigFloat.(((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2)))
                 # pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
-                pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
+                # pfplus .+= BigFloat.(((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2))
+                # pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
                 # pfplus .+= BigFloat.(((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2))
                 # matrix = BigFloat.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))); pfplus .+= ((-1)^length(myset)) .* prod(matrix,dims=2)
             end
