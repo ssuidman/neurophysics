@@ -21,18 +21,18 @@ end
 
 # Write variables to mat-file
 matfile = matopen(joinpath(matlab_dir,"variables_julia/test.mat"),"w")
-write(matfile,"previn",previn)
-write(matfile,"pfminneg",pfminneg)
-write(matfile,"actualdiseases",actualdiseases)
-write(matfile,"pfmin",pfmin)
+    write(matfile,"previn",previn)
+    write(matfile,"pfminneg",pfminneg)
+    write(matfile,"actualdiseases",actualdiseases)
+    write(matfile,"pfmin",pfmin)
 close(matfile)
 
 # Retrive variables from mat-file 
 matfile = matopen(joinpath(matlab_dir,"variables_julia/test.mat"),"r")
-previn = read(matfile, "previn")
-pfminneg = read(matfile, "pfminneg")
-actualdiseases = read(matfile, "actualdiseases")
-pfmin = read(matfile, "pfmin")
+    previn = read(matfile, "previn")
+    pfminneg = read(matfile, "pfminneg")
+    actualdiseases = read(matfile, "actualdiseases")
+    pfmin = read(matfile, "pfmin")
 close(matfile)
 
 

@@ -12,6 +12,7 @@ using IJulia
 using Random
 using Octavian
 using LoopVectorization
+using ProgressBars
 using Printf
 using Random
 using DelimitedFiles

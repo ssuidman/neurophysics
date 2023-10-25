@@ -58,43 +58,6 @@ end
 patientprev[diagset404]
 patientprev[diagset2_matlab]
 
-file = XLSX.openxlsx("/Users/sam/Downloads/patient case.xlsx")
-    data_alisa = file["Sheet1"][7:end,1:end]
-close(test_excel)
-
-# 2867 true, 2502 true, 1731 true, 3568 false, 437 true, 3426 true, 3978 false, 1122 true, 1019 true,55 false, 3118 false, 987 false
-
-data_alisa
-previn_alisa = Float64.(data_alisa[2:end,2])
-sens_alisa = Float64.(data_alisa[2:end,3:end])[:,[1,2,3,5,6,8,9]]
-sensneg_alisa = Float64.(data_alisa[2:end,3:end])[:,[4,7,10,11,12]]
-pfmin_alisa = 1 .- sens_alisa'
-pfminneg_alisa = prod(1 .- sensneg_alisa', dims=1)[1,:]
-
-pfplus_alisa, posterior_alisa, dt_array_alisa = quickscore(previn_alisa,pfmin_alisa,pfminneg_alisa,false)
-# jldopen("variables/alisa_example.jld","a") do file
-#     delete!(file, "posterior_prod_log_bigfloat")
-#     delete!(file, "pfplus_prod_log_bigfloat")
-#     file["posterior_prod_log_bigfloat"] = posterior_alisa
-#     file["pfplus_prod_log_bigfloat"] = pfplus_alisa
-# end
-jldopen("variables/alisa_example.jld","r") do file
-    global posterior_prod = file["posterior_prod"] 
-    global posterior_prod_bigfloat = file["posterior_prod_bigfloat"] 
-    global posterior_log = file["posterior_prod_log"] 
-    global posterior_log_bigfloat = file["posterior_prod_log_bigfloat"] 
-end
-
-# _log = copy(posterior_alisa)
-# _log_big = copy(posterior_alisa)
-# _prod = copy(posterior_alisa)
-# _prod_big = copy(posterior_alisa)
-
-posterior_prod
-posterior_prod_bigfloat
-posterior_log
-posterior_log_bigfloat
-
 # diagset404[patientprev[diagset404] .!=0]
 
 # CartesianIndex(36, 2487)
