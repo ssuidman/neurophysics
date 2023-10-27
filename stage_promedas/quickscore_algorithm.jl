@@ -78,8 +78,8 @@ function quickscore(previn::Vector{Float64}, pfmin, pfminneg::Vector{Float64}, b
                 # pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev)), dims=2))
                 # pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2)
                 i += 1
-                t1a = time()
-                push!(dt_array,t1a-t1)
+                t2 = time()
+                push!(dt_array,t2-t1)
                 print("$(myset[1]-1): $v --> $(t1a-t1) \n")
             else 
                 # pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
@@ -109,7 +109,7 @@ function quickscore(previn::Vector{Float64}, pfmin, pfminneg::Vector{Float64}, b
     # P_joint = pfplus[2:end,1] .* previn
     posterior = pfpluspd[2:end] / pfpluspd[1] 
     print("\nTotal running time was $dt \n\n")
-    return pfplus, posterior, dt_array 
+    return pfplus, posterior, dt 
 end 
 
 
