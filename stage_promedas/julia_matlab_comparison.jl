@@ -57,19 +57,9 @@ module test_module
 end
 
 
-# test_module.f(18)
-# test_module.f(19)
-test_module.f(20)
-# test_module.f(8)
-# test_module.f(9)
-# test_module.f(10)
-# test_module.f(11)
-# test_module.f(12)
-# test_module.f(13)
-# test_module.f(14)
-# test_module.f(15)
-# test_module.f(16)
-# test_module.f(17)
+test_module.f(3)
+test_module.f(4)
+
 
 
 # 1.    log of matrix(101,100)              [test 2^20  Julia.ipynb: 42.53 sec      Matlab: 24.87 sec     Julia.jl: 41.58   Julia-@avx: 24.52]
@@ -201,7 +191,4 @@ test_module.f(20)
 # 10. Vector Octavian 0.44      5.00
 # 11. Vector Octavian 0.43      5.04
 # 12. Vector Octavian 0.43      4.96
-
-
-
 

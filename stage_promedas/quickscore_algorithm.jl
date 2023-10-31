@@ -18,7 +18,7 @@ function loop_term_2(myset,pfmin,prevminneg,prev,method)
     if      method in ["exp-sum-log","exp-sum-log prod1"];  term_2 = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev)), dims=2)); 
     elseif  method in ["exp-sum-log BF(all)"];        term_2 = BigFloat.(((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev)), dims=2))); 
     elseif  method in ["prod BF(all)"];               term_2 = BigFloat.(((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2)); 
-    elseif  method in ["prod","prod prod1"];                term_2 = ((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2);
+    elseif  method in ["prod","prod prod1"];            term_2 = ((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2);
     elseif  method in ["prod BF(pfmin)"];             term_2 = ((-1)^length(myset)) .* prod(1e-50 .+ BigFloat.(pfmin[myset, :]) .* prevminneg .+ (1 .- prev), dims=2); 
     elseif  method in ["exp-sum-log BF(pfmin)"];      term_2 = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ BigFloat.(pfmin[myset, :]) .* prevminneg .+ (1 .- prev)), dims=2)); 
     end
@@ -26,14 +26,14 @@ function loop_term_2(myset,pfmin,prevminneg,prev,method)
 end
 
 function loop_term_3(myset,pfmin,prevminneg,prev,method)
-    if      method in ["exp-sum-log"];                  term_3 = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
-    elseif  method in ["exp-sum-log BF(all)"];    term_3 = BigFloat.(((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2)));
-    elseif  method in ["prod BF(all)"];           term_3 = BigFloat.(((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2));
-    elseif  method in ["prod"];                         term_3 = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
-    elseif  method in ["exp-sum-log prod1"];            term_3 = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
-    elseif  method in ["prod prod1"];                   term_3 = ((-1)^length(myset)) .* prod(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2);  
-    elseif  method in ["prod BF(pfmin)"];         term_3 = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(BigFloat.(pfmin[myset, :]),dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
-    elseif  method in ["exp-sum-log BF(pfmin)"];  term_3 = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(BigFloat.(pfmin[myset, :]),dims=1) .* prevminneg .+ (1 .- prev))), dims=2)); 
+    if      method in ["exp-sum-log"];              term_3 = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
+    elseif  method in ["exp-sum-log BF(all)"];      term_3 = BigFloat.(((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2)));
+    elseif  method in ["prod BF(all)"];             term_3 = BigFloat.(((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2));
+    elseif  method in ["prod"];                     term_3 = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
+    elseif  method in ["exp-sum-log prod1"];        term_3 = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
+    elseif  method in ["prod prod1"];               term_3 = ((-1)^length(myset)) .* prod(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2);  
+    elseif  method in ["prod BF(pfmin)"];           term_3 = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(BigFloat.(pfmin[myset, :]),dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
+    elseif  method in ["exp-sum-log BF(pfmin)"];    term_3 = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(BigFloat.(pfmin[myset, :]),dims=1) .* prevminneg .+ (1 .- prev))), dims=2)); 
     #from this line on no more in loop_term_1() and loop_term_2()
     elseif  method in ["prod BF(pfmin,prec=)"];   term_3 = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(BigFloat.(pfmin[myset, :],precision=100),dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
     end
