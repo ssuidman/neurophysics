@@ -121,17 +121,17 @@ print_posteriors(posteriors,"case 3",9,1e-17,1e-6)
 
 
 # This shows that it does not matter what precision in BigFloat you choose, it is always slow 
-# pfmin = posteriors["case 1"].pfmin[4] # pick pfmin of 'case 1'
-# println("normal BigFloat")
-# @btime prod(BigFloat.(pfmin),dims=1);
-# println("normal BigFloat with specification of precision = 256 bits")
-# @btime prod(BigFloat.(pfmin,precision=256),dims=1);
-# println("precision of 100 bits")
-# @btime prod(BigFloat.(pfmin,precision=100),dims=1);
-# println("same precision = 53 bits as Float64")
-# @btime prod(BigFloat.(pfmin,precision=53),dims=1);
-# println("normal Float64 (no BigFloat at all)")
-# @btime prod(pfmin,dims=1);
+pfmin = posteriors["case 1"].pfmin[4] # pick pfmin of 'case 1'
+println("normal BigFloat")
+@benchmark prod(BigFloat.(pfmin),dims=1);
+println("normal BigFloat with specification of precision = 256 bits")
+@btime prod(BigFloat.(pfmin,precision=256),dims=1);
+println("precision of 100 bits")
+@btime prod(BigFloat.(pfmin,precision=100),dims=1);
+println("same precision = 53 bits as Float64")
+@btime prod(BigFloat.(pfmin,precision=53),dims=1);
+println("normal Float64 (no BigFloat at all)")
+@btime prod(pfmin,dims=1);
 
 # # This shows that posterior=pfplus[2:end,1].*previn./pfplus[1] is still bad if you take only the denominator pfplus[1] using BigFloat(pfmin)
 # p1 = posteriors["case 1"].pfplus[4][2:end,1] .* posteriors["case 1"].previn[4] ./ posteriors["case 1"].pfplus[8][1];
