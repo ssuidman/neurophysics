@@ -60,7 +60,6 @@ function posteriors_func(case,methods,matrix_alisa,P_joint_matlab,posterior_matl
     )
 
     for (i,method) in enumerate(methods)
-        println(method)
         pfplus, posterior, dt = quickscore(previn, pfmin, pfminneg, true, method)
         push!(posteriors, (nr = i+3,
             Method = method, 
@@ -83,15 +82,12 @@ function posteriors_func(case,methods,matrix_alisa,P_joint_matlab,posterior_matl
 end
 
 # Running the function for the different cases m=7,8,9
-methods = ["exp-sum-log","exp-sum-log BF(all)","prod","prod BF(all)","prod BF(pfmin)"]#,"exp-sum-log BF(pfmin)"]
+methods = ["exp-sum-log","prod","prod Fl32","exp-sum-log Fl32","prod BF","prod BF Fl128"]#,"prod BF Fl64","exp-sum-log BF"]
 posteriors = Dict{String,DataFrame}(
-    "case 1" => posteriors_func("case 1",methods,matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab),
-    "case 2" => posteriors_func("case 2",methods,matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab),
+    # "case 1" => posteriors_func("case 1",methods,matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab),
+    # "case 2" => posteriors_func("case 2",methods,matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab),
     "case 3" => posteriors_func("case 3",methods,matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab)
 )
-
-
-
 
 # Function that prints the data I want in nice tables
 function print_posteriors(posteriors,case,m,lim1,lim2)    
@@ -115,24 +111,24 @@ function print_posteriors(posteriors,case,m,lim1,lim2)
 end 
 
 # Calling the printing function for the different cases 
-print_posteriors(posteriors,"case 1",7,1e-17,1e-6)
-print_posteriors(posteriors,"case 2",8,1e-17,1e-6)
+# print_posteriors(posteriors,"case 1",7,1e-17,1e-6)
+# print_posteriors(posteriors,"case 2",8,1e-17,1e-6)
 print_posteriors(posteriors,"case 3",9,1e-17,1e-6)
 
 
 # This shows that it does not matter what precision in BigFloat you choose, it is always slow 
-pfmin = posteriors["case 1"].pfmin[4] # pick pfmin of 'case 1'
-println("normal BigFloat")
-@benchmark prod(BigFloat.(pfmin),dims=1);
-println("normal BigFloat with specification of precision = 256 bits")
-@btime prod(BigFloat.(pfmin,precision=256),dims=1);
-println("precision of 100 bits")
-@btime prod(BigFloat.(pfmin,precision=100),dims=1);
-println("same precision = 53 bits as Float64")
-@btime prod(BigFloat.(pfmin,precision=53),dims=1);
-println("normal Float64 (no BigFloat at all)")
-@btime prod(pfmin,dims=1);
-
+setprecision(BigFloat,53) # same precision as Float64 64
+setprecision(ArbFloat,53) # same precision as Float64
+println("BigFloat prod(pfmin)")
+@btime BF = prod(BigFloat.(posteriors["case 3"].pfmin[4]),dims=1);
+println("ArbFloat prod(pfmin)")
+@btime Arb = prod(ArbFloat.(posteriors["case 3"].pfmin[4]),dims=1);
+println("Float64 prod(pfmin)")
+@btime F64 = prod(posteriors["case 3"].pfmin[4],dims=1);
+println("posteriors_func 'prod' (=Float64)")
+@btime posteriors_func("case 3",["prod"],matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab)
+println("posteriors_func 'prod Float32' (=Float64)")
+@btime posteriors_func("case 3",["prod Float32"],matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab)
 # # This shows that posterior=pfplus[2:end,1].*previn./pfplus[1] is still bad if you take only the denominator pfplus[1] using BigFloat(pfmin)
 # p1 = posteriors["case 1"].pfplus[4][2:end,1] .* posteriors["case 1"].previn[4] ./ posteriors["case 1"].pfplus[8][1];
 # p2 = posteriors["case 1"].pfplus[6][2:end,1] .* posteriors["case 1"].previn[6] ./ posteriors["case 1"].pfplus[8][1];

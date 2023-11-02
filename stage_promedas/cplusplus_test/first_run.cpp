@@ -1,3 +1,4 @@
+ // g++ -std=c++11 -o first_run.o first_run.cpp
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -14,8 +15,8 @@ int main() {
     vector<double> previn;
     vector<vector<double> > pfmin;
     vector<double> pfminneg;
-    vector<long double> posterior_julia;
-    vector<long double> posterior;
+    vector<double> posterior_julia;
+    vector<double> posterior;
 
     ifstream previnFile("patient404_case_1_previn.csv");
     ifstream pfminFile("patient404_case_1_pfmin.csv");
@@ -105,14 +106,14 @@ int main() {
     cout << "Size of \n\tfloat:\t\t " << sizeof(float) << " bytes" << endl;
     cout << "\tdouble:\t\t " << sizeof(double) << " bytes" << endl;
     cout << "\tlong double:\t " << sizeof(long double) << " bytes" << endl << endl;
-    cout << "c++ running time:\n\t" << t << " sec" << endl;
     cout << "pfplus:\n";
-    for (int i = 0; i < 10; i++) {std::cout << "\t" << pfplus[i] << endl;} cout << "\t..." << endl;
-    for (int i = 0; i < 10; i++) {std::cout << "\t" << pfplus[pfplus.size()-10+i] << endl;} cout << endl;
+    int q = 2;
+    for (int i = 0; i < q; i++) {std::cout << "\t" << pfplus[i] << endl;} cout << "\t..." << endl;
+    for (int i = 0; i < q; i++) {std::cout << "\t" << pfplus[pfplus.size()-q+i] << endl;} cout << endl;
     cout << "posterior:\n";
-    for (int i = 0; i < 10; i++) {std::cout << "\t" << posterior[i] << endl;} cout << "\t..." << endl;
-    for (int i = 0; i < 10; i++) {std::cout << "\t" << posterior[posterior.size()-10+i] << endl;} cout << endl;
-
+    for (int i = 0; i < q; i++) {std::cout << "\t" << posterior[i] << endl;} cout << "\t..." << endl;
+    for (int i = 0; i < q; i++) {std::cout << "\t" << posterior[posterior.size()-q+i] << endl;} cout << endl;
+    cout << "c++ running time:\n\t" << t << " sec" << endl;
     cout << "max-abs difference of posterior c++ and 'prod BF(pfmin)':\n\t" << maxDifference << endl;
 
     return 0;

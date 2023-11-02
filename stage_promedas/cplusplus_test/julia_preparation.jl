@@ -37,7 +37,7 @@ prev = repeat(previn',inner=(n+1,1)) # copies of prevalences
 for i in 1:n prev[i+1,i]=1 end # set the (i+1,i) entry 1 to condition on d_i=1,  etc. 
 prevend = vcat(1,previn) # prevend are the prevalences 1, P(d_1=1),... P(d_n=1) and is needed to multiply at the end
 prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)
-pfplus, pfplus_, myset = zeros(Float64,n+1), zeros(Float64,n+1), Vector{Int64}()
+pfplus, pfplus_, myset = zeros(Float64,n+1,1), zeros(Float64,n+1,1), Vector{Int64}()
 t = @elapsed begin
     for i in ProgressBar(0:(2^m-1)) # iterate over 2^m possibilities 
         v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
@@ -64,5 +64,17 @@ posterior = P_joint / pfplus[1];
 println("Maximum difference pfplus: $(maximum(abs,pfplus_.-pfplus))")
 println("Maximum difference posterior: $(maximum(abs,posterior_.-posterior))")
 
+if true
+    pfmin = Float32.(pfmin)
+    prevminneg = Float32.(prevminneg)
+    prev = Float32.(prev)
+    pfplus = Float32.(pfplus)
+    prevend = Float32.(prevend)
+    println("Types\n \tpfmin: $(typeof(pfmin)) \tprevminneg: $(typeof(prevminneg)) \tprev: $(typeof(prev)) \tpfplus: $(typeof(pfplus)) \tprevend: $(typeof(prevend))")
+end
 
+term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
+term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2)
 
+prod(1e-50 .+ prod(pfmin[myset, :],dims=1) .* prevminneg + (1 .- prev),dims=2)
+Float64(1e-50) .+ Float64.(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .-prev))
