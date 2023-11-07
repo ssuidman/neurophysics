@@ -1,7 +1,5 @@
-include("packages.jl")
-include("quickscore_preparation.jl")
-include("quickscore_algorithm.jl")
-
+include("../packages.jl")
+include("../quickscore_algorithm.jl")
 matlab_path = "/Users/sam/Documents/MATLAB/code/"
 
 # read pumcu_diagsIdName.txt as Vector{String} sorted along first dimension

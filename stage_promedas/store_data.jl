@@ -1,6 +1,4 @@
-using JLD2
-using MAT
-
+include("packages.jl")
 matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
 
 # Write variables to jld-file 
@@ -20,7 +18,7 @@ jldopen("variables/data.jld", "r") do file
 end
 
 # Write variables to mat-file
-matfile = matopen(joinpath(matlab_dir,"variables_julia/test.mat"),"w")
+matfile = matopen(joinpath(matlab_dir,"variables/test.mat"),"w")
     write(matfile,"previn",previn)
     write(matfile,"pfminneg",pfminneg)
     write(matfile,"actualdiseases",actualdiseases)
@@ -28,7 +26,7 @@ matfile = matopen(joinpath(matlab_dir,"variables_julia/test.mat"),"w")
 close(matfile)
 
 # Retrive variables from mat-file 
-matfile = matopen(joinpath(matlab_dir,"variables_julia/test.mat"),"r")
+matfile = matopen(joinpath(matlab_dir,"variables/test.mat"),"r")
     previn = read(matfile, "previn")
     pfminneg = read(matfile, "pfminneg")
     actualdiseases = read(matfile, "actualdiseases")

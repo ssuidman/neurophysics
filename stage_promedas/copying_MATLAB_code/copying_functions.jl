@@ -1,7 +1,6 @@
-include("packages.jl")
-include("quickscore_preparation.jl")
-include("quickscore_algorithm.jl")
-include("useful_functions.jl")
+include("../packages.jl")
+include("../quickscore_algorithm.jl")
+include("../useful_functions.jl")
 
 # previn, pfmin, pfminneg, actualdiseases, sens, sensneg = quickscore_preparation() 
 # sensneg 

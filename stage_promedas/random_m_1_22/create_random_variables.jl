@@ -1,11 +1,8 @@
-# To use the function, run the following lines: 
-# include("quickscore_preparation.jl")
-# previn,pfmin,pfminneg = quickscore_preparation()
-using Random
+include("../packages.jl")
 
-function quickscore_preparation(n_disease=100,n_test=30,expected_number_of_diseases=3,sparseness=0.5,m_wanted=1)
+function quickscore_preparation(m_wanted)
     # the input parameters are 'typical number of diags', 'number of findings', 'typical number of diags', 'connection density'
-
+    n_disease, n_test, expected_number_of_diseases, sparseness = 100, 30, 3, 0.5;
     # the model
     prev = (rand(n_disease) .+ 1) / 2  # prevalences of diseases, random between 0.5 and 1
     prev .= expected_number_of_diseases * prev / sum(prev)  # in expectation sumofdiags diseases present
@@ -39,16 +36,9 @@ function quickscore_preparation(n_disease=100,n_test=30,expected_number_of_disea
     pfmin = 1 .- sens 
     pfminneg = vec( prod(1 .- sensneg, dims=1) )  # be careful with the dimensions: scalar result prod(1 - sensneg) for singleton neg test is wrong.
 
-    return prev, pfmin, pfminneg, actualdiseases, sens, sensneg
+    return prev, pfmin, pfminneg
 end 
 
-# # Here it goes into quickscore.
-# tic()
-# (posterior, pfpluspd, pfplus) = fun_quickscoreW(prev, pfmin, pfminneg)
-# timep = toq()
-
-# actualdiseases = zeros(size(prev))
-# actualdiseases[actualdiags] .= 1
 # println("prevalences, posteriors, actual diseases")
 # println([prev', posterior', actualdiseases'])
 # println("\nPositive findings: $m, time: $timep")
