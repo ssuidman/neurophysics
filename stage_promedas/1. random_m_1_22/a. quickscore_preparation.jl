@@ -1,6 +1,9 @@
 include("../packages.jl")
 
 function quickscore_preparation(m_wanted)
+    """
+    Function that creates some variables that can be put into the quickscore algorithm
+    """
     # the input parameters are 'typical number of diags', 'number of findings', 'typical number of diags', 'connection density'
     n_disease, n_test, expected_number_of_diseases, sparseness = 100, 30, 3, 0.5;
     # the model
@@ -39,8 +42,5 @@ function quickscore_preparation(m_wanted)
     return prev, pfmin, pfminneg
 end 
 
-# println("prevalences, posteriors, actual diseases")
-# println([prev', posterior', actualdiseases'])
-# println("\nPositive findings: $m, time: $timep")
-# ```
+
 

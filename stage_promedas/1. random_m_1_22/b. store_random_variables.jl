@@ -1,12 +1,12 @@
 include("../packages.jl")
+include("a. quickscore_preparation.jl")
 include("../quickscore_algorithm.jl")
-include("create_random_variables.jl")
 matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
 m_variables_dir = "variables/random_m_1_22/"
 
 
 
-function create_random_pfmin(matlab_dir,m_variables_dir)
+function store_random_pfmin(matlab_dir,m_variables_dir)
     """ 
     This function creates for m=1-22 random variables for previn, pfmin, pfminneg
     It then stores it as julia variables (JDL-file) and matlab variables (MAT-file)
@@ -32,11 +32,12 @@ function create_random_pfmin(matlab_dir,m_variables_dir)
     end
     println("Creating 'previn', 'pfmin', 'pfminneg'")
 end
-# create_random_pfmin(matlab_dir,m_variables_dir)
+################## DO NOT RUN THIS, BECAUSE ALL VARIABLES WILL RESTORE!!! ##################
+# store_random_pfmin(matlab_dir,m_variables_dir)
 
 
 
-function create_random_posterior(matlab_dir,m_variables_dir,run_julia,run_matlab)
+function store_random_posterior(m_variables_dir,run_julia,run_matlab)
     """
     This function runs the quickscore algorithm for all m=1-22 in Julia and MATLAB
     It then stores in the variables in the same JDL- and MAT-files as before 
@@ -64,7 +65,8 @@ function create_random_posterior(matlab_dir,m_variables_dir,run_julia,run_matlab
         run(`/Applications/MATLAB_R2022b.app/bin/matlab -nodesktop -nosplash -r "run('~/Documents/MATLAB/Wim/run_all.m');exit;"`)
     end
 end
-# create_random_posterior(matlab_dir,m_variables_dir,true,true)
+################## DO NOT RUN THIS, BECAUSE ALL VARIABLES WILL RESTORE!!! ##################
+# store_random_posterior(m_variables_dir,true,true)
 
 
 

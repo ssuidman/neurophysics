@@ -1,5 +1,4 @@
 include("packages.jl")
-include("quickscore_preparation.jl")
 include("quickscore_algorithm.jl")
 
 # Loading data from a slightly adjusted version of Alisa's file 
