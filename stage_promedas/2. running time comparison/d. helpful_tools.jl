@@ -5,7 +5,7 @@ include("../run_one_time.jl")
 
 println("Do not run this file in the terminal!!!")
 # Get variables for a random case m=17
-previn, pfmin, pfminneg, pfplus_, P_joint_, posterior_, dt_, prev, prevminneg, myset = run_one_time_var(m=17,n_myset=3);
+previn, pfmin, pfminneg, pfplus_, P_joint_, posterior_, dt_, prev, prevminneg, myset = run_one_time_var(m=17,n_myset=3,language="Julia");
 
 # With @pprof it opens a link to localhost where you can see what core functions are used the most 
 println("########## @pprof ############")
@@ -18,6 +18,6 @@ PProf.clear()
 @code_warntype quickscore(previn, pfmin, pfminneg, "MATLAB")           
 # Run this to get information about how much running time a code line or function will take      
 @benchmark log.(rand(101,100))
-# Run the line below or in your mac terminal this: "julia --trace-compile=stderr d.\ precompile_test.jl" to see 
+# Run the line below or in your mac terminal this: "julia --trace-compile=stderr e.\ precompile_test.jl" to see 
 # that precompiling does not happend during the loops
 run(`/Applications/Julia-1.9.app/Contents/Resources/julia/bin/julia --trace-compile=stderr "2. running time comparison/d. precompile_test.jl"`)

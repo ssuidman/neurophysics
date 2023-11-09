@@ -95,7 +95,7 @@ end
 
 function import_matlab_variables()
     matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
-    matfile = matopen(joinpath(matlab_dir,"variables_julia/patient_cases.mat"),"r")
+    matfile = matopen(joinpath(matlab_dir,"variables/copying_MATLAB_code/patient_cases.mat"),"r")
         patient_matlab = read(matfile, "patient_to_julia")
         test_matlab = read(matfile, "test_to_julia")
         diagn = read(matfile,"diagn")[1,:]

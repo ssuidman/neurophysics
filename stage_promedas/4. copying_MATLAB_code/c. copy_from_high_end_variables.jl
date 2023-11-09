@@ -1,7 +1,7 @@
 include("../packages.jl")
 include("../quickscore_algorithm.jl")
 include("../useful_functions.jl")
-include("copying_functions.jl")
+include("b. copying_functions.jl")
 
 patient, test, diagn, diagtest, prev, belowSens, aboveSens, restSens, malemult, femalemult, agemult, parents, link_ext = import_matlab_variables(); 
 # diagtest[3421,919] #[3216,3997] [1634,3325] [2351,3470]

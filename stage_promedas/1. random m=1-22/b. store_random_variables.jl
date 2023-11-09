@@ -62,7 +62,7 @@ function store_random_posterior(m_variables_dir,run_julia,run_matlab)
         end
     end
     if run_matlab
-        run(`/Applications/MATLAB_R2022b.app/bin/matlab -nodesktop -nosplash -r "run('~/Documents/MATLAB/Wim/run_all.m');exit;"`)
+        run(`/Applications/MATLAB_R2022b.app/bin/matlab -nodesktop -nosplash -r "run('~/Documents/MATLAB/Wim/1. random m=1-22/b_storeb_store_random_variables.m');exit;"`)
     end
 end
 ################## DO NOT RUN THIS, BECAUSE ALL VARIABLES WILL RESTORE!!! ##################

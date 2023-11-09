@@ -1,26 +1,20 @@
-include("packages.jl")
-include("quickscore_algorithm.jl")
+include("../packages.jl")
+include("../quickscore_algorithm.jl")
+include("../run_one_time.jl")
 
-# Load random variables
-file = jldopen("variables/m_18.jld", "r")
-previn = file["previn"]
-pfminneg = file["pfminneg"]
-pfmin = file["pfmin"]
-close(file)
+previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=18,n_myset=5,language="Julia");
+myset = [1,2,4,7,10]; # just like in MATLAB
+# pfplus_, P_joint_, posterior_,dt_ = quickscore(previn, pfmin, pfminneg,"prod");  
 
-# Set some variables based on the loaded variables
-m,n = size(pfmin)
-prev = repeat(previn',inner=(n+1,1)); for i in 1:n prev[i+1,i]=1 end 
-prevend = vcat(1,previn) # prevend are the prevalences 1, P(d_1=1),... P(d_n=1) and is needed to multiply at the end
-prevminneg = prev.*pfminneg'
 
-# Run the quickscore algorithm
-# pfplus,posterior,dt = quickscore(previn, pfmin, pfminneg,false); 
+y_julia = Vector{Any}(undef,5)
+y_julia[1] = prod(pfmin[myset, :],dims=1); 
+y_julia[2] = 1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev));
+y_julia[3] = log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)));
+y_julia[4] = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
+y_julia[5] = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2); 
 
-# Set some myset values
-myset = [1,2,4,7,10]
 
-# Reken een aantal termen uit in Julia gesorteerd van complex naar simpel
 a_j = prod(pfmin[myset, :],dims=1)
 b_j = 1e-50 .+ (a_j .* prevminneg .+ (1 .- prev))
 c_j = log.(b_j)
@@ -28,27 +22,36 @@ d_j = ((-1)^length(myset)) .* exp.(sum(c_j, dims=2))
 e_j = ((-1)^length(myset)) .* prod(b_j, dims=2)
 
 # Import the same calculated line from Matlab
+y_matlab = Vector{Any}(undef,5)
 matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
-matfile = matopen(joinpath(matlab_dir,"variables_julia/test.mat"),"r") 
-    a_m = read(matfile, "a") 
-    b_m = read(matfile, "b") 
-    c_m = read(matfile, "c") 
-    d_m = read(matfile, "d") 
-    e_m = read(matfile, "e") 
+matfile = matopen(joinpath(matlab_dir,"variables/precision_comparison/vars.mat"),"r") 
+    y_matlab[1] = read(matfile, "a") 
+    y_matlab[2] = read(matfile, "b") 
+    y_matlab[3] = read(matfile, "c") 
+    y_matlab[4] = read(matfile, "d") 
+    y_matlab[5] = read(matfile, "e") 
 close(matfile) 
 
-# There is a difference between Julia and Matlab, even for very basic function such as in a_j and a_m --> prod(matrix,dims=1)
+i = 1
+
 println("Comparing Julia and Matlab for different single line operations\n")
-a_i = findall(a_m-a_j .!= 0)
-pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), a_j[a_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), a_m[a_i][1:3])),header=String["Julia prod(matrix,dims=1)","Matlab prod(matrix,dims=1)"])
-b_i = findall(b_m-b_j .!= 0)
-pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), b_j[b_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), b_m[b_i][1:3])),header=String["Julia ()","Matlab ()"])
-c_i = findall(c_m-c_j .!= 0)
-pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), c_j[c_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), c_m[c_i][1:3])),header=String["Julia log()","Matlab log()"])
-d_i = findall(d_m-d_j .!= 0)
-pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), d_j[d_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), d_m[d_i][1:3])),header=String["Julia exp-sum-log()","Matlab exp-sum-log()"])
-e_i = findall(e_m-e_j .!= 0)
-pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), e_j[e_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), e_m[e_i][1:3])),header=String["Julia prod()","Matlab prod()"])
+headers = [["Julia prod(matrix,dims=1)","Matlab prod(matrix,dims=1)"],["Julia ()","Matlab ()"],["Julia log()","Matlab log()"],["Julia exp-sum-log()","Matlab exp-sum-log()"],["Julia prod()","Matlab prod()"]]
+for i=1:5
+    idx = findall(y_matlab[i]-y_julia[i] .!= 0)
+    pretty_table(hcat(y_julia[i][idx][1:3],y_matlab[i][idx][1:3])',formatters = ft_printf("%.20f"),row_names=headers[i])
+end
+
+# # There is a difference between Julia and Matlab, even for very basic function such as in a_j and a_m --> prod(matrix,dims=1)
+# a_i = findall(a_m-a_j .!= 0)
+# pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), a_j[a_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), a_m[a_i][1:3])),header=String["Julia prod(matrix,dims=1)","Matlab prod(matrix,dims=1)"])
+# b_i = findall(b_m-b_j .!= 0)
+# pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), b_j[b_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), b_m[b_i][1:3])),header=String["Julia ()","Matlab ()"])
+# c_i = findall(c_m-c_j .!= 0)
+# pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), c_j[c_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), c_m[c_i][1:3])),header=String["Julia log()","Matlab log()"])
+# d_i = findall(d_m-d_j .!= 0)
+# pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), d_j[d_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), d_m[d_i][1:3])),header=String["Julia exp-sum-log()","Matlab exp-sum-log()"])
+# e_i = findall(e_m-e_j .!= 0)
+# pretty_table(hcat(Printf.format.(Ref(Printf.Format("%.70f")), e_j[e_i][1:3]),Printf.format.(Ref(Printf.Format("%.70f")), e_m[e_i][1:3])),header=String["Julia prod()","Matlab prod()"])
 
 # Het probleem is dat prod(matrix,dims=1)[i] anders werkt dan prod(vector[i])
 # prod(vector[i]) en matlab[i] zijn hetzelfde

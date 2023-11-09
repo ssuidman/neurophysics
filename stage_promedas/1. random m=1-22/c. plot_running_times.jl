@@ -1,4 +1,5 @@
 include("../packages.jl")
+include("../run_one_time.jl")
 matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
 m_variables_dir = "variables/random_m_1_22/"
 figure_dir = "figures/"
@@ -13,12 +14,10 @@ function plotting_m_1_22(save_figure,matlab_dir,m_variables_dir,figure_dir)
     dt_julia = zeros(22)
     dt_matlab = zeros(22)
     for i in 1:22
-        file = jldopen(m_variables_dir*"m_$i.jld", "r")
-            dt_julia[i] = file["dt"]
-        close(file)
-        matfile = matopen(matlab_dir*m_variables_dir*"m_$i.mat","r")
-            dt_matlab[i] = read(matfile, "dt")
-        close(matfile)
+        previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=i,n_myset=i,language="Julia");
+        dt_julia[i] = dt
+        previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=i,n_myset=i,language="MATLAB");
+        dt_matlab[i] = dt
     end
 
     gr()
