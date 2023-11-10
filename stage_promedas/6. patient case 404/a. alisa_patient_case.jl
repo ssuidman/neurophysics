@@ -1,5 +1,5 @@
-include("packages.jl")
-include("quickscore_algorithm.jl")
+include("../packages.jl")
+include("../quickscore_algorithm.jl")
 
 # Loading data from a slightly adjusted version of Alisa's file 
 matrix_alisa = Dict{String,Matrix{Any}}()
@@ -11,14 +11,13 @@ close(file)
 # Loading saved variables from MATLAB
 posterior_matlab, P_joint_matlab, dt_matlab = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
 matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
-matfile = matopen(joinpath(matlab_dir,"variables_julia/patient404.mat"),"r")
+matfile = matopen(joinpath(matlab_dir,"variables/patient404.mat"),"r")
     for case_nr=1:3
         posterior_matlab["case $case_nr"] = read(matfile, "pdiag_case_$case_nr")[:,1]
         P_joint_matlab["case $case_nr"] = read(matfile, "P_joint_case_$case_nr")[:,1]
         dt_matlab["case $case_nr"] = read(matfile,"dt_case_$case_nr")
     end
 close(matfile)
-
 
 
 # Function to save the data in a dictionaries containing DataFrames 
@@ -59,7 +58,7 @@ function posteriors_func(case,methods,matrix_alisa,P_joint_matlab,posterior_matl
     )
 
     for (i,method) in enumerate(methods)
-        pfplus, posterior, dt = quickscore(previn, pfmin, pfminneg, true, method)
+        pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg, method)
         push!(posteriors, (nr = i+3,
             Method = method, 
             # Posterior_range = [minimum(posterior),maximum(posterior)],

@@ -1,4 +1,4 @@
- // g++ -std=c++11 -o first_run.o first_run.cpp
+ // g++ -std=c++11 -o c.\ cpp_run.o b.\ cpp_run.cpp
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -6,7 +6,6 @@
 #include <cmath>
 #include <algorithm>
 #include <chrono>
-#include </opt/homebrew/include/gmp.h>
 
 using namespace std;
 
@@ -17,11 +16,13 @@ int main() {
     vector<double> pfminneg;
     vector<double> posterior_julia;
     vector<double> posterior;
+    double dt_julia;
 
-    ifstream previnFile("patient404_case_1_previn.csv");
-    ifstream pfminFile("patient404_case_1_pfmin.csv");
-    ifstream pfminnegFile("patient404_case_1_pfminneg.csv");
-    ifstream posterior_File("patient404_case_1_posterior.csv");
+    ifstream previnFile("../variables/cpp_preparation/patient404_case_1_previn.csv");
+    ifstream pfminFile("../variables/cpp_preparation/patient404_case_1_pfmin.csv");
+    ifstream pfminnegFile("../variables/cpp_preparation/patient404_case_1_pfminneg.csv");
+    ifstream posterior_File("../variables/cpp_preparation/patient404_case_1_posterior_BF.csv");
+    ifstream dtFile("../variables/cpp_preparation/patient404_case_1_dt_exp_sum_log.csv");
 
     string line;
     while (getline(previnFile, line, '\n')) {previn.push_back(stold(line));}
@@ -37,6 +38,8 @@ int main() {
         posterior_julia.push_back(stold(line));
         posterior.push_back(stold(line)); // to have a vector of the same type and size as posterior_julia
     }
+    while (getline(dtFile, line, '\n')) {dt_julia = stod(line);}
+
     int m = (!pfmin.empty()) ? pfmin.size() : 0;
     int n = previn.size();
     vector<vector<double> > prev(n + 1, previn);
@@ -50,8 +53,7 @@ int main() {
     }
     vector<double> pfplus(n + 1, 0.0);
     vector<int> myset;
-    double t = 0.0;
-
+    double dt_cpp = 0.0;
 
     cout << "implemention quickscore algorithm..." << endl;
     auto start = chrono::steady_clock::now();
@@ -80,7 +82,7 @@ int main() {
         }
     }
     auto end = chrono::steady_clock::now();
-    t = chrono::duration_cast<chrono::milliseconds>(end - start).count() / 1000.0;
+    dt_cpp = chrono::duration_cast<chrono::milliseconds>(end - start).count() / 1000.0;
 
     vector<double> P_joint(n, 0.0);
     for (int i = 1; i < n+1; i++) {
@@ -113,8 +115,9 @@ int main() {
     cout << "posterior:\n";
     for (int i = 0; i < q; i++) {std::cout << "\t" << posterior[i] << endl;} cout << "\t..." << endl;
     for (int i = 0; i < q; i++) {std::cout << "\t" << posterior[posterior.size()-q+i] << endl;} cout << endl;
-    cout << "c++ running time:\n\t" << t << " sec" << endl;
-    cout << "max-abs difference of posterior c++ and 'prod BF(pfmin)':\n\t" << maxDifference << endl;
+    cout << "C++ running time:\n\t" << dt_cpp << " sec" << endl;
+    cout << "Julia running time:\n\t" << dt_julia << " sec" << endl;
+    cout << "max-abs difference of posterior c++ and 'prod BF':\n\t" << maxDifference << endl;
 
     return 0;
 }
