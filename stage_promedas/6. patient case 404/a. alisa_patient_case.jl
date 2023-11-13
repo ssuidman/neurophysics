@@ -105,30 +105,26 @@ function print_posteriors(posteriors,case,m,lim1,lim2)
     This function prints the results of a certain patient case (m=7,8,9) using the variable 'posteriors' that contains all the data in a compact way.
     Via 'lim1' / 'lim2' you can set the coloring limits to highlight which quickscore methods give sensible results. 
     """
-    diff_posterior, diff_P_joint = Vector{Float64}[], Vector{Float64}[]
-    for i=eachindex(posteriors[case].Method)
-        push!(diff_posterior,Float64.(maximum(abs,reduce(hcat,posteriors[case].Posterior) .- posteriors[case].Posterior[i],dims=1)[1,:]))
-        push!(diff_P_joint,Float64.(maximum(abs,reduce(hcat,posteriors[case].P_joint) .- posteriors[case].P_joint[i],dims=1)[1,:]))
-    end
+    posterior_diff = Float64.(maximum(abs,reshape(reduce(hcat,posteriors[case].Posterior),(size(posteriors[case].Posterior[1])[1],size(posteriors[case].Posterior)[1],1)) .- reshape(reduce(hcat,posteriors[case].Posterior),(size(posteriors[case].Posterior[1])[1],1,size(posteriors[case].Posterior)[1])),dims=1)[1,:,:])
+    P_joint_diff = Float64.(maximum(abs,reshape(reduce(hcat,posteriors[case].P_joint),(size(posteriors[case].P_joint[1])[1],size(posteriors[case].P_joint)[1],1)) .- reshape(reduce(hcat,posteriors[case].P_joint),(size(posteriors[case].P_joint[1])[1],1,size(posteriors[case].P_joint)[1])),dims=1)[1,:,:])
     hl1 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (d[i, j] >= 0 && d[i, j] <= 1) : false, crayon"green")
     hl2 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (d[i, j] <= 0 || d[i, j] >= 1) : false, crayon"red")
     hl3 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (abs(d[i, j]) < lim1 && d[i,j]!=0) : false, crayon"green")
     hl4 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (abs(d[i, j]) < lim2 && d[i,j]!=0) : false, crayon"green")
-
+    
     println("############################################## $case (m=$m) ##############################################")
     println("############################################## range of P_joint and Posterior between methods ##############################################")
     pretty_table(posteriors[case][:,["nr","Method","P_joint_min","P_joint_max","Posterior_min","Posterior_max"]],alignment=:l,highlighters=(hl1,hl2))
     println("############################################## max-abs diffference of P_joint between methods ##############################################")
-    pretty_table(hcat(reduce(hcat,diff_P_joint),posteriors[case].time),row_names=posteriors[case].Method,header=vcat(posteriors[case].Method,"time"),alignment=:l,highlighters=hl3) # ,formatters=ft_printf("%1.0e")
+    pretty_table(hcat(P_joint_diff,posteriors[case].time),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=hl3)
     println("########################################### max-abs diffference of Posterior between methods ###########################################")
-    pretty_table(hcat(reduce(hcat,diff_posterior),posteriors[case].time),row_names=posteriors[case].Method,header=vcat(posteriors[case].Method,"time"),alignment=:l,highlighters=hl4)
+    pretty_table(hcat(posterior_diff,posteriors[case].time),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=hl4)
 end 
 
 # Calling the printing function for the different cases 
 print_posteriors(posteriors,"case 1",7,1e-17,1e-6)
 print_posteriors(posteriors,"case 2",8,1e-17,1e-6)
 print_posteriors(posteriors,"case 3",9,1e-17,1e-6)
-
 
 
 
