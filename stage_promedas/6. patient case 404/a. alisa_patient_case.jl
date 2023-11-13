@@ -1,71 +1,82 @@
 include("../packages.jl")
 include("../quickscore_algorithm.jl")
+include("../5. C++ test/a. cpp_preparation_functions.jl")
 
-# Loading data from a slightly adjusted version of Alisa's file 
-matrix_alisa = Dict{String,Matrix{Any}}()
-file = XLSX.openxlsx("/Users/sam/Downloads/patient cases.xlsx")
-    matrix_alisa["case 1"] = file["Sheet1"][1:end, 1:end]
-    matrix_alisa["case 2"] = file["Sheet2"][1:end, 1:end]
-    matrix_alisa["case 3"] = file["Sheet3"][1:end, 1:end]
-close(file)
-# Loading saved variables from MATLAB
-posterior_matlab, P_joint_matlab, dt_matlab = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
-matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
-matfile = matopen(joinpath(matlab_dir,"variables/patient404.mat"),"r")
+function get_patient_data()
+    """
+    This function stores the raw data from the Excel file from Alisa 
+    """
+    # Loading variables from Alisa's patient case (normal and high precision) and C++
+    posterior_alisa, P_joint_alisa, dt_alisa = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
+    posterior_alisa_hp, P_joint_alisa_hp, dt_alisa_hp = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
+    posterior_cpp, P_joint_cpp, dt_cpp = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
     for case_nr=1:3
-        posterior_matlab["case $case_nr"] = read(matfile, "pdiag_case_$case_nr")[:,1]
-        P_joint_matlab["case $case_nr"] = read(matfile, "P_joint_case_$case_nr")[:,1]
-        dt_matlab["case $case_nr"] = read(matfile,"dt_case_$case_nr")
+        # Get the raw data from the function in the C++ folder
+        patient_cases_raw, data_alisa, previn, pfmin, pfminneg = prepare_patient_data("case $case_nr")
+        # Load Alisa normal 
+        posterior_alisa["case $case_nr"] = data_alisa[:,"Pdiag(standart double precision)"]
+        P_joint_alisa["case $case_nr"] = data_alisa[:,"Pjoint(standart double precision)"]
+        dt_alisa["case $case_nr"] = patient_cases_raw["case $case_nr"][7,4]
+        # Load Alisa hp 
+        posterior_alisa_hp["case $case_nr"] = data_alisa[:,"Pdiag (high precision)"]
+        P_joint_alisa_hp["case $case_nr"] = data_alisa[:,"Pjoint (high precision)"]
+        dt_alisa_hp["case $case_nr"] = patient_cases_raw["case $case_nr"][7,3]
+        # Load C++ 
+        posterior_cpp["case $case_nr"] = Float64.(readdlm("variables/cpp/cpp_output_case_$case_nr.csv",',')[2:end,1])
+        P_joint_cpp["case $case_nr"] = Float64.(readdlm("variables/cpp/cpp_output_case_$case_nr.csv",',')[2:end,2])
+        dt_cpp["case $case_nr"] = readdlm("variables/cpp/cpp_output_case_$case_nr.csv",',')[2,3]
     end
-close(matfile)
+    # Load my own MATLAB run 
+    posterior_matlab, P_joint_matlab, dt_matlab = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
+    matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
+    matfile = matopen(joinpath(matlab_dir,"variables/patient_404/patient404.mat"),"r")
+        for case_nr=1:3
+            posterior_matlab["case $case_nr"] = read(matfile, "pdiag_case_$case_nr")[:,1]
+            P_joint_matlab["case $case_nr"] = read(matfile, "P_joint_case_$case_nr")[:,1]
+            dt_matlab["case $case_nr"] = read(matfile,"dt_case_$case_nr")
+        end
+    close(matfile)
+
+    method_others = ["Matlab Sam","Matlab Alisa","Matlab Alisa hp","C++"]
+    posterior_others = [posterior_matlab,posterior_alisa,posterior_alisa_hp,posterior_cpp]
+    P_joint_others = [P_joint_matlab,P_joint_alisa,P_joint_alisa_hp,P_joint_cpp]
+    dt_others = [dt_matlab,dt_alisa,dt_alisa_hp,dt_cpp]
+    return method_others, posterior_others, P_joint_others, dt_others
+end
 
 
-# Function to save the data in a dictionaries containing DataFrames 
-function posteriors_func(case,methods,matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab)
-    data_alisa = DataFrame(Float64.(matrix_alisa[case][8:end,:]),matrix_alisa[case][6,:])
-    # diagnosis_nr = Int64.(data_alisa[:,"diagnosis ID number"])
-    P_joint_hp_alisa = data_alisa[:,"Pjoint (high precision)"]
-    P_joint_alisa = data_alisa[:,"Pjoint(standart double precision)"]
-    posterior_hp_alisa = data_alisa[:,"Pdiag (high precision)"]
-    posterior_alisa = data_alisa[:,"Pdiag(standart double precision)"]
 
-    idx_sens = names(data_alisa)[startswith.(names(data_alisa),"Sensitivity")]
-    all_sens = Matrix(data_alisa[:,idx_sens])
-    pos_idx = matrix_alisa[case][4,1:length(idx_sens)] .== "'true'"
-    neg_idx = matrix_alisa[case][4,1:length(idx_sens)] .== "'false'"
-    sens = all_sens[:,pos_idx]
-    sensneg = all_sens[:,neg_idx]
-    previn = data_alisa[:,"prevalence"]
-    pfmin = 1 .- sens'
-    pfminneg = prod(1 .- sensneg', dims=1)[1,:]
-    
+function posteriors_func(case,methods,method_others,posterior_others,P_joint_others,dt_others)
+    """
+    This function aims to process the raw data into one compact variable named 'posteriors' (containing more than Posteriors only)
+    Then it runs the quickscore algorithm and stores these results too in this variable
+    """
+    # Retrieve the loaded data from the patient cases 
+    patient_cases_raw, data_alisa, previn, pfmin, pfminneg = prepare_patient_data(case)
+    # Save the data from other methods in the DataFrame
     posteriors = DataFrame(
-        nr = Int[1,2,3], 
-        Method = String["Matlab Sam","Matlab Alisa","Matlab hp"], 
-        # Posterior_range = Vector{Float64}[[minimum(posterior_matlab[case]),maximum(posterior_matlab[case])],[minimum(posterior_alisa),maximum(posterior_alisa)],[minimum(posterior_hp_alisa),maximum(posterior_hp_alisa)]], 
-        Posterior_min = Float64[minimum(posterior_matlab[case]),minimum(posterior_alisa),minimum(posterior_hp_alisa)], 
-        Posterior_max = Float64[maximum(posterior_matlab[case]),maximum(posterior_alisa),maximum(posterior_hp_alisa)], 
-        Posterior = Vector{BigFloat}[posterior_matlab[case],posterior_alisa,posterior_hp_alisa], 
-        # P_joint_range = Vector{Float64}[[minimum(P_joint_matlab[case]),maximum(P_joint_matlab[case])],[minimum(P_joint_alisa),maximum(P_joint_alisa)],[minimum(P_joint_hp_alisa),maximum(P_joint_hp_alisa)]], 
-        P_joint_min = Float64[minimum(P_joint_matlab[case]),minimum(P_joint_alisa),minimum(P_joint_hp_alisa)], 
-        P_joint_max = Float64[maximum(P_joint_matlab[case]),maximum(P_joint_alisa),maximum(P_joint_hp_alisa)], 
-        P_joint = Vector{BigFloat}[P_joint_matlab[case],P_joint_alisa,P_joint_hp_alisa],
-        time = Float64[dt_matlab[case],matrix_alisa[case][7,4],matrix_alisa[case][7,3]],
-        previn = Vector{Float64}[[0.],[0.],[0.]],
-        pfmin = Matrix{Float64}[[[0.] [0.]],[[0.] [0.]],[[0.] [0.]]],
-        pfminneg = Vector{Float64}[[0.],[0.],[0.]],
-        pfplus = Matrix{BigFloat}[[[0.] [0.]],[[0.] [0.]],[[0.] [0.]]]
+        nr = Int[1,2,3,4], 
+        Method = method_others, 
+        Posterior_min = Float64[minimum(posterior[case]) for posterior in posterior_others], 
+        Posterior_max = Float64[maximum(posterior[case]) for posterior in posterior_others], 
+        Posterior = Vector{BigFloat}[posterior[case] for posterior in posterior_others], 
+        P_joint_min = Float64[minimum(P_joint[case]) for P_joint in P_joint_others], 
+        P_joint_max = Float64[maximum(P_joint[case]) for P_joint in P_joint_others], 
+        P_joint = Vector{Float64}[P_joint[case] for P_joint in P_joint_others], 
+        time = Float64[dt[case] for dt in dt_others],
+        previn = Vector{Float64}[[0.],[0.],[0.],[0.]],
+        pfmin = Matrix{Float64}[[[0.] [0.]],[[0.] [0.]],[[0.] [0.]],[[0.] [0.]]],
+        pfminneg = Vector{Float64}[[0.],[0.],[0.],[0.]],
+        pfplus = Matrix{BigFloat}[[[0.] [0.]],[[0.] [0.]],[[0.] [0.]],[[0.] [0.]]]
     )
-
+    # Run the quickscore algorithm for methods in Julia and store it in the DataFrame
     for (i,method) in enumerate(methods)
         pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg, method)
         push!(posteriors, (nr = i+3,
             Method = method, 
-            # Posterior_range = [minimum(posterior),maximum(posterior)],
             Posterior_min = minimum(posterior),
             Posterior_max = maximum(posterior),
             Posterior = posterior, 
-            # P_joint_range = [minimum(pfplus[2:end,1].*previn),maximum(pfplus[2:end,1].*previn)], 
             P_joint_min = minimum(pfplus[2:end,1].*previn),
             P_joint_max = maximum(pfplus[2:end,1].*previn),
             P_joint = pfplus[2:end,1].*previn,
@@ -75,20 +86,25 @@ function posteriors_func(case,methods,matrix_alisa,P_joint_matlab,posterior_matl
             pfminneg = pfminneg,
             pfplus = pfplus))
     end
-
     return posteriors
 end
 
+# Retrieve the data from the patient cases and others
+method_others, posterior_others, P_joint_others, dt_others = get_patient_data()
 # Running the function for the different cases m=7,8,9
-methods = ["exp-sum-log","prod","prod Fl32","exp-sum-log Fl32","prod BF","prod BF Fl128"]#,"prod BF Fl64","exp-sum-log BF"]
+quickscore_methods = ["exp-sum-log","prod","prod Fl32","exp-sum-log Fl32","prod BF","prod BF Fl128"]#,"prod BF Fl64","exp-sum-log BF"]
 posteriors = Dict{String,DataFrame}(
-    # "case 1" => posteriors_func("case 1",methods,matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab),
-    # "case 2" => posteriors_func("case 2",methods,matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab),
-    "case 3" => posteriors_func("case 3",methods,matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab)
+    "case 1" => posteriors_func("case 1",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others),
+    "case 2" => posteriors_func("case 2",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others),
+    "case 3" => posteriors_func("case 3",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others)
 )
 
 # Function that prints the data I want in nice tables
 function print_posteriors(posteriors,case,m,lim1,lim2)    
+    """
+    This function prints the results of a certain patient case (m=7,8,9) using the variable 'posteriors' that contains all the data in a compact way.
+    Via 'lim1' / 'lim2' you can set the coloring limits to highlight which quickscore methods give sensible results. 
+    """
     diff_posterior, diff_P_joint = Vector{Float64}[], Vector{Float64}[]
     for i=eachindex(posteriors[case].Method)
         push!(diff_posterior,Float64.(maximum(abs,reduce(hcat,posteriors[case].Posterior) .- posteriors[case].Posterior[i],dims=1)[1,:]))
@@ -109,32 +125,11 @@ function print_posteriors(posteriors,case,m,lim1,lim2)
 end 
 
 # Calling the printing function for the different cases 
-# print_posteriors(posteriors,"case 1",7,1e-17,1e-6)
-# print_posteriors(posteriors,"case 2",8,1e-17,1e-6)
+print_posteriors(posteriors,"case 1",7,1e-17,1e-6)
+print_posteriors(posteriors,"case 2",8,1e-17,1e-6)
 print_posteriors(posteriors,"case 3",9,1e-17,1e-6)
 
 
-# This shows that it does not matter what precision in BigFloat you choose, it is always slow 
-setprecision(BigFloat,53) # same precision as Float64 64
-setprecision(ArbFloat,53) # same precision as Float64
-println("BigFloat prod(pfmin)")
-@btime BF = prod(BigFloat.(posteriors["case 3"].pfmin[4]),dims=1);
-println("ArbFloat prod(pfmin)")
-@btime Arb = prod(ArbFloat.(posteriors["case 3"].pfmin[4]),dims=1);
-println("Float64 prod(pfmin)")
-@btime F64 = prod(posteriors["case 3"].pfmin[4],dims=1);
-println("posteriors_func 'prod' (=Float64)")
-@btime posteriors_func("case 3",["prod"],matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab)
-println("posteriors_func 'prod Float32' (=Float64)")
-@btime posteriors_func("case 3",["prod Float32"],matrix_alisa,P_joint_matlab,posterior_matlab,dt_matlab)
-# # This shows that posterior=pfplus[2:end,1].*previn./pfplus[1] is still bad if you take only the denominator pfplus[1] using BigFloat(pfmin)
-# p1 = posteriors["case 1"].pfplus[4][2:end,1] .* posteriors["case 1"].previn[4] ./ posteriors["case 1"].pfplus[8][1];
-# p2 = posteriors["case 1"].pfplus[6][2:end,1] .* posteriors["case 1"].previn[6] ./ posteriors["case 1"].pfplus[8][1];
-# p3 = posteriors["case 1"].pfplus[8][2:end,1] .* posteriors["case 1"].previn[8] ./ posteriors["case 1"].pfplus[8][1];
-# p4 = posteriors["case 1"].Posterior[8];
-# println("Difference\t 'prod BF(pfmin)'\t and\t 'exp-sum-log + BF(pfmin)@only pfplus[1]':\t $(Float64(maximum(abs,p4 - p1)))")
-# println("Difference\t 'prod BF(pfmin)'\t and\t 'prod + BF(pfmin)_for_pfplus[1]':\t\t $(Float64(maximum(abs,p3 - p2)))")
-# println("Difference\t 'prod BF(pfmin)'\t and\t 'prod BF(pfmin)' (calculated differently):\t $(maximum(abs,p4 - p3))")
 
 
 

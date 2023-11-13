@@ -1,0 +1,28 @@
+Methods,Julia,MATLAB
+log.(x_matrix),9.782708083,6.248144708
+@avx(log.(x_matrix)),6.301962083,0.0
+"prod(x_matrix,dims=1)",0.403214084,1.19659275
+"@avx(prod(x_matrix,dims=1))",0.411766875,0.0
+QS exp-sum-log,15.665510958,10.685508959
+QS exp-sum-log @avx(log),7.75546475,0.0
+QS exp-sum-log @avx(log) 2 steps,10.137457667,0.0
+QS exp-sum-log @avx(prod(pfmin)),15.590430375,0.0
+QS exp-sum-log @avx(exp),8.0394115,0.0
+QS exp-sum-log broadcast,13.935342208,0.0
+QS exp-sum-log declare-type,15.43946025,0.0
+QS prod,3.577341084,3.000188
+QS prod @avx(prod(term)),3.159875167,0.0
+QS log,14.873263041,8.691804583
+QS log @avx,7.137866709,0.0
+QS no prod/log,2.599481667,2.293213208
+QS no prod/log @avx,2.384641334,0.0
+Vector: Matrix{Float64},0.372362042,0.29874725
+Vector: Matrix{Int64},2.321596583,0.000884792
+Vector Octavian: Matrix{Float64},0.700017958,0.0
+Vector Octavian: Matrix{Int64},0.713403209,0.0
+Loop: Matrix{Float64},1.954229917,7.176370042
+Loop: Matrix{Int64},1.992549167,52.176022958
+Loop @inbounds: Matrix{Float64},1.566063291,0.0
+Loop @inbounds: Matrix{Int64},1.611325584,0.0
+Loop @avx: Matrix{Float64},0.521561375,0.0
+Loop @avx: Matrix{Int64},0.545831375,0.0

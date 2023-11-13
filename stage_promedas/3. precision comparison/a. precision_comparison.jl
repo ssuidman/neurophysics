@@ -166,10 +166,9 @@ pfplus_julia_exp_sum_log, P_joint_julia_exp_sum_log, posterior_julia_exp_sum_log
 
 # Een vergelijking binnen (en tussen) Matlab en Julia voor prod en log laat zien dat prod tussen Julia en Matlab het kleinste verschil is
 println("\n################################### Posterior comparison using prod1(pfmin) ###################################")
-pretty_table(hcat((posterior_julia_prod - posterior_julia_exp_sum_log),(posterior_matlab - posterior_julia_prod),(posterior_matlab - posterior_julia_exp_sum_log)),header=["Julia prod  -  Julia exp-sum-log","MATLAB prod  -  Julia prod","MATLAB exp-sum-log  -  Julia exp-sum-log"])
+pretty_table(hcat((posterior_julia_prod - posterior_julia_exp_sum_log),(posterior_matlab_exp_sum_log - posterior_julia_prod),(posterior_matlab_exp_sum_log - posterior_julia_exp_sum_log)),header=["Julia prod  -  Julia exp-sum-log","MATLAB prod  -  Julia prod","MATLAB exp-sum-log  -  Julia exp-sum-log"])
 println("\nConclusion 1: After 16 digits precision stops and in the end this causes precision problems after lots of calculations like prod/exp-sum-log and summing. BigFloat can help here. ")
 println("\nConclusion 2: prod-matrix and prod1-matrix have just different values after the cutoff of 16 digits. It is a 'coincidence' that prod1-matrix is the same as MATLAB's prod-matrix.")
-
 
 
 

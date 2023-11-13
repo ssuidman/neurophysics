@@ -1,4 +1,9 @@
- // g++ -std=c++11 -o c.\ cpp_run.o b.\ cpp_run.cpp
+//  Precompiling:
+ // g++ -std=c++11 -o d.\ cpp_run.o c.\ cpp_run.cpp
+//  Running the file for 3 different cases:
+//  ./d.\ cpp_run.o 1
+//  ./d.\ cpp_run.o 2
+//  ./d.\ cpp_run.o 3
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -9,8 +14,9 @@
 
 using namespace std;
 
-int main() {
-    // Retrieve variables from CSV files
+int main(int argc, char* argv[]) {
+    int cases = stoi(argv[1]);
+
     vector<double> previn;
     vector<vector<double> > pfmin;
     vector<double> pfminneg;
@@ -18,11 +24,34 @@ int main() {
     vector<double> posterior;
     double dt_julia;
 
-    ifstream previnFile("../variables/cpp_preparation/patient404_case_1_previn.csv");
-    ifstream pfminFile("../variables/cpp_preparation/patient404_case_1_pfmin.csv");
-    ifstream pfminnegFile("../variables/cpp_preparation/patient404_case_1_pfminneg.csv");
-    ifstream posterior_File("../variables/cpp_preparation/patient404_case_1_posterior_BF.csv");
-    ifstream dtFile("../variables/cpp_preparation/patient404_case_1_dt_exp_sum_log.csv");
+    ifstream previnFile;
+    ifstream pfminFile;
+    ifstream pfminnegFile;
+    ifstream posterior_File;
+    ifstream dtFile;
+
+    if (cases == 1){
+        cout << "Reading case 1" << endl;
+        previnFile.open("../variables/cpp/patient404_case_1_previn.csv");
+        pfminFile.open("../variables/cpp/patient404_case_1_pfmin.csv");
+        pfminnegFile.open("../variables/cpp/patient404_case_1_pfminneg.csv");
+        posterior_File.open("../variables/cpp/patient404_case_1_posterior_BF.csv");
+        dtFile.open("../variables/cpp/patient404_case_1_dt_exp_sum_log.csv");
+    } else if (cases == 2){
+        cout << "Reading case 2" << endl;
+        previnFile.open("../variables/cpp/patient404_case_2_previn.csv");
+        pfminFile.open("../variables/cpp/patient404_case_2_pfmin.csv");
+        pfminnegFile.open("../variables/cpp/patient404_case_2_pfminneg.csv");
+        posterior_File.open("../variables/cpp/patient404_case_2_posterior_BF.csv");
+        dtFile.open("../variables/cpp/patient404_case_2_dt_exp_sum_log.csv");
+    } else if (cases == 3){
+        cout << "Reading case 3" << endl;
+        previnFile.open("../variables/cpp/patient404_case_3_previn.csv");
+        pfminFile.open("../variables/cpp/patient404_case_3_pfmin.csv");
+        pfminnegFile.open("../variables/cpp/patient404_case_3_pfminneg.csv");
+        posterior_File.open("../variables/cpp/patient404_case_3_posterior_BF.csv");
+        dtFile.open("../variables/cpp/patient404_case_3_dt_exp_sum_log.csv");
+    }
 
     string line;
     while (getline(previnFile, line, '\n')) {previn.push_back(stold(line));}
@@ -55,7 +84,7 @@ int main() {
     vector<int> myset;
     double dt_cpp = 0.0;
 
-    cout << "implemention quickscore algorithm..." << endl;
+    cout << "Implementing quickscore algorithm..." << endl;
     auto start = chrono::steady_clock::now();
     double sumExp;
     double product;
@@ -108,16 +137,35 @@ int main() {
     cout << "Size of \n\tfloat:\t\t " << sizeof(float) << " bytes" << endl;
     cout << "\tdouble:\t\t " << sizeof(double) << " bytes" << endl;
     cout << "\tlong double:\t " << sizeof(long double) << " bytes" << endl << endl;
-    cout << "pfplus:\n";
-    int q = 2;
-    for (int i = 0; i < q; i++) {std::cout << "\t" << pfplus[i] << endl;} cout << "\t..." << endl;
-    for (int i = 0; i < q; i++) {std::cout << "\t" << pfplus[pfplus.size()-q+i] << endl;} cout << endl;
-    cout << "posterior:\n";
-    for (int i = 0; i < q; i++) {std::cout << "\t" << posterior[i] << endl;} cout << "\t..." << endl;
-    for (int i = 0; i < q; i++) {std::cout << "\t" << posterior[posterior.size()-q+i] << endl;} cout << endl;
-    cout << "C++ running time:\n\t" << dt_cpp << " sec" << endl;
-    cout << "Julia running time:\n\t" << dt_julia << " sec" << endl;
-    cout << "max-abs difference of posterior c++ and 'prod BF':\n\t" << maxDifference << endl;
+    cout << "###############################################" << endl;
+    cout << "######## Results for patient 404 (m=7) ########" << endl;
+    cout << "###############################################" << endl;
+    int q = 4;
+    cout << "posterior: \t\t P_joint:\n";
+    for (int i = 0; i < q; i++) {std::cout << "\t" << posterior[i] << "\t\t" << P_joint[i] << endl;} cout << "\t..." << endl;
+    for (int i = 0; i < q; i++) {std::cout << "\t" << posterior[posterior.size()-q+i] << "\t\t" << P_joint[P_joint.size()-q+i] << endl;};
+    cout << "Running time:\n\t" << "C++:\t" << dt_cpp << " sec\n\tJulia:\t" << dt_julia << " sec" << endl;
+    cout << "max-abs difference of posterior C++ and 'prod BF':\n\t" << maxDifference << endl;
+
+    ofstream output_file;
+    if (cases == 1) {
+        cout << "Writing case 1" << endl;
+        output_file.open("../variables/cpp/cpp_output_case_1.csv");
+    } else if (cases == 2) {
+        cout << "Writing case 2" << endl;
+        output_file.open("../variables/cpp/cpp_output_case_2.csv");
+    } else if (cases == 3) {
+        cout << "Writing case 3" << endl;
+        output_file.open("../variables/cpp/cpp_output_case_3.csv");
+    }
+
+    output_file << "Posterior,P_joint,dt" << endl;
+    for (size_t i = 0; i < posterior.size(); ++i) {
+        if (i==0) {output_file << posterior[i] << "," << P_joint[i] << "," << dt_cpp << endl;}
+        else {output_file << posterior[i] << "," << P_joint[i] << endl;}
+    }
+    output_file.close();
+    cout << "Saved 'posterior', 'P_joint' and 'dt' to CSV files" << endl;
 
     return 0;
 }
