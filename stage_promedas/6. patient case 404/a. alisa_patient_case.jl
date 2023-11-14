@@ -72,7 +72,7 @@ function posteriors_func(case,methods,method_others,posterior_others,P_joint_oth
     # Run the quickscore algorithm for methods in Julia and store it in the DataFrame
     for (i,method) in enumerate(methods)
         pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg, method)
-        push!(posteriors, (nr = i+3,
+        push!(posteriors, (nr = i+size(method_others)[1],
             Method = method, 
             Posterior_min = minimum(posterior),
             Posterior_max = maximum(posterior),
@@ -90,9 +90,9 @@ function posteriors_func(case,methods,method_others,posterior_others,P_joint_oth
 end
 
 # Retrieve the data from the patient cases and others
-method_others, posterior_others, P_joint_others, dt_others = get_patient_data()
+method_others, posterior_others, P_joint_others, dt_others = get_patient_data();
 # Running the function for the different cases m=7,8,9
-quickscore_methods = ["exp-sum-log","prod","prod Fl32","exp-sum-log Fl32","prod BF","prod BF Fl128"]#,"prod BF Fl64","exp-sum-log BF"]
+quickscore_methods = ["exp-sum-log","prod","prod Fl32","exp-sum-log Fl32"]#,"prod BF","prod BF Fl128"]#,"prod BF Fl64","exp-sum-log BF"];
 posteriors = Dict{String,DataFrame}(
     "case 1" => posteriors_func("case 1",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others),
     "case 2" => posteriors_func("case 2",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others),
@@ -100,7 +100,7 @@ posteriors = Dict{String,DataFrame}(
 )
 
 # Function that prints the data I want in nice tables
-function print_posteriors(posteriors,case,m,lim1,lim2)    
+function print_posteriors(posteriors,case,m; lim1=1e-17, lim2=1e-6, save=false)    
     """
     This function prints the results of a certain patient case (m=7,8,9) using the variable 'posteriors' that contains all the data in a compact way.
     Via 'lim1' / 'lim2' you can set the coloring limits to highlight which quickscore methods give sensible results. 
@@ -119,13 +119,29 @@ function print_posteriors(posteriors,case,m,lim1,lim2)
     pretty_table(hcat(P_joint_diff,posteriors[case].time),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=hl3)
     println("########################################### max-abs diffference of Posterior between methods ###########################################")
     pretty_table(hcat(posterior_diff,posteriors[case].time),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=hl4)
+
+    range = posteriors[case][:,["P_joint_min","P_joint_max","Posterior_min","Posterior_max","time"]]
+    df_P_joint = DataFrame(hcat(posteriors[case].Method,P_joint_diff,posteriors[case].time),vcat("Pjoint diff",posteriors[case].Method,"time"))
+    df_posterior = DataFrame(hcat(posteriors[case].Method,posterior_diff,posteriors[case].time),vcat("Posterior diff",posteriors[case].Method,"time"))
+    println(df_posterior)
+    if save
+        CSV.write("variables/patient_404/methods_diff_case_$(parse(Int,case[end]))_range.csv",range)
+        CSV.write("variables/patient_404/methods_diff_case_$(parse(Int,case[end]))_P_joint.csv",df_P_joint)
+        CSV.write("variables/patient_404/methods_diff_case_$(parse(Int,case[end]))_posterior.csv",df_posterior)
+        # XLSX.writetable("variables/patient_404/methods_diff_case_$(parse(Int,case[end])).xlsx","P_joint"=>df_P_joint,"posterior"=>df_posterior,"range"=>range; overwrite=true)
+    end
 end 
 
 # Calling the printing function for the different cases 
-print_posteriors(posteriors,"case 1",7,1e-17,1e-6)
-print_posteriors(posteriors,"case 2",8,1e-17,1e-6)
-print_posteriors(posteriors,"case 3",9,1e-17,1e-6)
+print_posteriors(posteriors,"case 1",7,save=true)
+print_posteriors(posteriors,"case 2",8,save=true)
+print_posteriors(posteriors,"case 3",9,save=true)
 
+case = "case 1"
+posterior_diff = Float64.(maximum(abs,reshape(reduce(hcat,posteriors[case].Posterior),(size(posteriors[case].Posterior[1])[1],size(posteriors[case].Posterior)[1],1)) .- reshape(reduce(hcat,posteriors[case].Posterior),(size(posteriors[case].Posterior[1])[1],1,size(posteriors[case].Posterior)[1])),dims=1)[1,:,:])
+P_joint_diff = Float64.(maximum(abs,reshape(reduce(hcat,posteriors[case].P_joint),(size(posteriors[case].P_joint[1])[1],size(posteriors[case].P_joint)[1],1)) .- reshape(reduce(hcat,posteriors[case].P_joint),(size(posteriors[case].P_joint[1])[1],1,size(posteriors[case].P_joint)[1])),dims=1)[1,:,:])
 
-
+range = posteriors[case][:,["P_joint_min","P_joint_max","Posterior_min","Posterior_max","time"]]
+df_P_joint = DataFrame(hcat(posteriors[case].Method,P_joint_diff,posteriors[case].time),vcat("Pjoint diff",posteriors[case].Method,"time"))
+df_posterior = DataFrame(hcat(posteriors[case].Method,posterior_diff,posteriors[case].time),vcat("Posterior diff",posteriors[case].Method,"time"))
 
