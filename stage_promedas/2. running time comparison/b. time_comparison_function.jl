@@ -21,10 +21,12 @@ function f(method)
     Random.seed!(1234) 
     x_matrix, myset, pfmin, prevminneg, prev, M, n = rand(101, 100), [1,4,5,6], rand(18,100), rand(101,100), rand(101,100), 200000, 100 
     y, z, m, z_int, c = zeros(n), rand(M,n), rand(1,n), rand([-1 1],M,n), Matrix{Float64}(undef,M,1) 
-
+    # Change the 'method_numbers' and 'method_names' in Julia and 'methods' in MATLAB by adding the new numbers you add
+    # Then run MATLAB and thereafter Julia '2. running_time_comparison' again 
     t = @elapsed begin 
         if method==1;       println("log.(x_matrix)");                      for k=1:2^18;   y = log.(x_matrix); end; 
         elseif method==1.1; println("@avx(log.(x_matrix))");                for k=1:2^18;   y = @avx(log.(x_matrix)); end; 
+        elseif method==1.2; println("log.(x_matrix) BF Fl128");             for k in ProgressBar(1:2^11);   x_matrix = BigFloat.(x_matrix,precision=113); y = (log.(x_matrix)); end; 
         elseif method==2;   println("prod(x_matrix,dims=1)");               for k=1:2^18;   y = prod(x_matrix,dims=1); end; 
         elseif method==2.1; println("@avx(prod(x_matrix,dims=1))");         for k=1:2^18;   y = @avx(prod(x_matrix,dims=1)); end; 
         elseif method==3;   println("QS exp-sum-log");                      for k=1:2^18;   y = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2)); end;

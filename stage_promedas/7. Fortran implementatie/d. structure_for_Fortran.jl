@@ -1,14 +1,5 @@
-using CSV
-using DelimitedFiles
-using DataFrames
-using ProgressBars
-
-function loop_term(myset,pfmin,prevminneg,prev,method)
-    if      method in ["exp-sum-log"];  term = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
-    elseif  method in ["prod"];         term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
-    end
-    return term
-end
+include("../packages.jl")
+include("../quickscore_algorithm.jl")
 
 function quickscore_Fortran(previn,pfmin,pfminneg;method="prod")
     m,n = !isempty(pfmin) ? size(pfmin) : (0, length(previn)) # m number of postests. n number of diags. if size(postest) is 0, then we set m=0 `` 
@@ -19,24 +10,25 @@ function quickscore_Fortran(previn,pfmin,pfminneg;method="prod")
     pfplus = zeros(Float64,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
 
     dt = @elapsed begin
-        for i in ProgressBar(0:(2^m-1)) # iterate over 2^m possibilities 
-            v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
-            myset = findall(v.==1) # find places of the 1-elements
-            pfplus = pfplus .+ loop_term(myset,pfmin,prevminneg,prev,method)
+        for i in ProgressBar(0:(2^m-1)) 
+            v = digits(i,base=2,pad=m) 
+            myset = findall(v.==1) 
+            # pfplus = pfplus + ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
+            pfplus = pfplus + ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
         end
     end
     println("\nRunning time: $dt")
 
     P_joint = pfplus[2:end,1] .* previn
-    posterior = P_joint / pfplus[1] 
+    posterior = P_joint / pfplus[1,1] 
     return P_joint, posterior, dt 
 end
+
 
 previn = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_3_previn.csv",header=false)))[:,1]
 pfmin = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_3_pfmin.csv",header=false)))
 pfminneg = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_3_pfminneg.csv",header=false)))[:,1]
+P_joint, posterior, dt = quickscore(previn,pfmin,pfminneg,"prod BF")
 
-P_joint, posterior, dt = quickscore_Fortran(previn,pfmin,pfminneg,method="exp-sum-log")
-
-
+P_joint
 

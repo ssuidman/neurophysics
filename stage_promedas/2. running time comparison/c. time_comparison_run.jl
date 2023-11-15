@@ -1,9 +1,10 @@
 include("../packages.jl")
 include("b. time_comparison_function.jl")
 
-println("Total running time will take ~3.5 minutes") 
-method_names = ["log.(x_matrix)","@avx(log.(x_matrix))","prod(x_matrix,dims=1)","@avx(prod(x_matrix,dims=1))","QS exp-sum-log","QS exp-sum-log @avx(log)","QS exp-sum-log @avx(log) 2 steps","QS exp-sum-log @avx(prod(pfmin))","QS exp-sum-log @avx(exp)","QS exp-sum-log broadcast","QS exp-sum-log declare-type","QS prod","QS prod @avx(prod(term))","QS log","QS log @avx","QS no prod/log","QS no prod/log @avx","Vector: Matrix{Float64}","Vector: Matrix{Int64}","Vector Octavian: Matrix{Float64}","Vector Octavian: Matrix{Int64}","Loop: Matrix{Float64}","Loop: Matrix{Int64}","Loop @inbounds: Matrix{Float64}","Loop @inbounds: Matrix{Int64}","Loop @avx: Matrix{Float64}","Loop @avx: Matrix{Int64}"];
-method_numbers = [1,1.1,2,2.1,3,3.1,3.2,3.3,3.4,3.5,3.6,4,4.1,5,5.1,6,6.1,7,7.1,8,8.1,9,9.1,10,10.1,11,11.1];
+println("Total running time will take ~3.5 minutes for all methods + ~10.5 minutes for 'log.(x_matrix) BF Fl128'") 
+# Change 'method_names' and 'method_numbers' in Julia and 'methods' in matlab when adding a new line in 'b. time_comparison_function.jl'
+method_names = ["log.(x_matrix)","@avx(log.(x_matrix))","log.(x_matrix) BF Fl128 (n=10^11)","prod(x_matrix,dims=1)","@avx(prod(x_matrix,dims=1))","QS exp-sum-log","QS exp-sum-log @avx(log)","QS exp-sum-log @avx(log) 2 steps","QS exp-sum-log @avx(prod(pfmin))","QS exp-sum-log @avx(exp)","QS exp-sum-log broadcast","QS exp-sum-log declare-type","QS prod","QS prod @avx(prod(term))","QS log","QS log @avx","QS no prod/log","QS no prod/log @avx","Vector: Matrix{Float64}","Vector: Matrix{Int64}","Vector Octavian: Matrix{Float64}","Vector Octavian: Matrix{Int64}","Loop: Matrix{Float64}","Loop: Matrix{Int64}","Loop @inbounds: Matrix{Float64}","Loop @inbounds: Matrix{Int64}","Loop @avx: Matrix{Float64}","Loop @avx: Matrix{Int64}"];
+method_numbers = [1,1.1,1.2,2,2.1,3,3.1,3.2,3.3,3.4,3.5,3.6,4,4.1,5,5.1,6,6.1,7,7.1,8,8.1,9,9.1,10,10.1,11,11.1];
 
 dt_julia = zeros(size(method_numbers))
 for (i,method) in enumerate(method_numbers)
@@ -17,7 +18,7 @@ matfile = matopen(joinpath(matlab_dir,"variables/running_time_comparison/matlab_
 close(matfile)
 
 df = DataFrame([method_names,dt_julia,dt_matlab],["Methods","Julia","MATLAB"])
-# CSV.write("variables/time_comparison/time_method_comparison.csv",df)
+CSV.write("variables/time_comparison/time_method_comparison.csv",df)
 
 
 # 1.    log of matrix(101,100)              [test 2^20  Julia.ipynb: 42.53 sec      Matlab: 24.87 sec     Julia.jl: 41.58   Julia-@avx: 24.52]
