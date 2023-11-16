@@ -10,6 +10,7 @@ function get_patient_data()
     posterior_alisa, P_joint_alisa, dt_alisa = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
     posterior_alisa_hp, P_joint_alisa_hp, dt_alisa_hp = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
     posterior_cpp, P_joint_cpp, dt_cpp = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
+    posterior_fortran, P_joint_fortran, dt_fortran = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
     for case_nr=1:3
         # Get the raw data from the function in the C++ folder
         patient_cases_raw, data_alisa, previn, pfmin, pfminneg = prepare_patient_data("case $case_nr")
@@ -25,6 +26,10 @@ function get_patient_data()
         posterior_cpp["case $case_nr"] = Float64.(readdlm("variables/cpp/cpp_output_case_$case_nr.csv",',')[2:end,1])
         P_joint_cpp["case $case_nr"] = Float64.(readdlm("variables/cpp/cpp_output_case_$case_nr.csv",',')[2:end,2])
         dt_cpp["case $case_nr"] = readdlm("variables/cpp/cpp_output_case_$case_nr.csv",',')[2,3]
+        # Load Fortran
+        posterior_fortran["case $case_nr"] = Float64.(readdlm("variables/fortran_patient404/output_case_$case_nr.csv")[1:end,1])
+        P_joint_fortran["case $case_nr"] = Float64.(readdlm("variables/fortran_patient404/output_case_$case_nr.csv")[1:end,2])
+        dt_fortran["case $case_nr"] = readdlm("variables/fortran_patient404/output_case_$case_nr.csv")[1,3]
     end
     # Load my own MATLAB run 
     posterior_matlab, P_joint_matlab, dt_matlab = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
@@ -37,14 +42,12 @@ function get_patient_data()
         end
     close(matfile)
 
-    method_others = ["Matlab Sam","Matlab Alisa","Matlab Alisa hp","C++"]
-    posterior_others = [posterior_matlab,posterior_alisa,posterior_alisa_hp,posterior_cpp]
-    P_joint_others = [P_joint_matlab,P_joint_alisa,P_joint_alisa_hp,P_joint_cpp]
-    dt_others = [dt_matlab,dt_alisa,dt_alisa_hp,dt_cpp]
+    method_others = ["Matlab Sam","Matlab Alisa","Matlab Alisa hp","C++","Fortran"]
+    posterior_others = [posterior_matlab,posterior_alisa,posterior_alisa_hp,posterior_cpp,posterior_fortran]
+    P_joint_others = [P_joint_matlab,P_joint_alisa,P_joint_alisa_hp,P_joint_cpp,P_joint_fortran]
+    dt_others = [dt_matlab,dt_alisa,dt_alisa_hp,dt_cpp,dt_fortran]
     return method_others, posterior_others, P_joint_others, dt_others
 end
-
-
 
 function posteriors_func(case,methods,method_others,posterior_others,P_joint_others,dt_others)
     """
@@ -55,7 +58,7 @@ function posteriors_func(case,methods,method_others,posterior_others,P_joint_oth
     patient_cases_raw, data_alisa, previn, pfmin, pfminneg = prepare_patient_data(case)
     # Save the data from other methods in the DataFrame
     posteriors = DataFrame(
-        nr = Int[1,2,3,4], 
+        nr = Int[1,2,3,4,5], 
         Method = method_others, 
         Posterior_min = Float64[minimum(posterior[case]) for posterior in posterior_others], 
         Posterior_max = Float64[maximum(posterior[case]) for posterior in posterior_others], 
@@ -64,10 +67,10 @@ function posteriors_func(case,methods,method_others,posterior_others,P_joint_oth
         P_joint_max = Float64[maximum(P_joint[case]) for P_joint in P_joint_others], 
         P_joint = Vector{Float64}[P_joint[case] for P_joint in P_joint_others], 
         time = Float64[dt[case] for dt in dt_others],
-        previn = Vector{Float64}[[0.],[0.],[0.],[0.]],
-        pfmin = Matrix{Float64}[[[0.] [0.]],[[0.] [0.]],[[0.] [0.]],[[0.] [0.]]],
-        pfminneg = Vector{Float64}[[0.],[0.],[0.],[0.]],
-        pfplus = Matrix{BigFloat}[[[0.] [0.]],[[0.] [0.]],[[0.] [0.]],[[0.] [0.]]]
+        previn = Vector{Float64}[[0.],[0.],[0.],[0.],[0.]],
+        pfmin = Matrix{Float64}[[[0.] [0.]],[[0.] [0.]],[[0.] [0.]],[[0.] [0.]],[[0.] [0.]]],
+        pfminneg = Vector{Float64}[[0.],[0.],[0.],[0.],[0.]],
+        pfplus = Matrix{BigFloat}[[[0.] [0.]],[[0.] [0.]],[[0.] [0.]],[[0.] [0.]],[[0.] [0.]]]
     )
     # Run the quickscore algorithm for methods in Julia and store it in the DataFrame
     for (i,method) in enumerate(methods)
@@ -120,10 +123,10 @@ function print_posteriors(posteriors,case,m; lim1=1e-17, lim2=1e-6, save=false)
     println("########################################### max-abs diffference of Posterior between methods ###########################################")
     pretty_table(hcat(posterior_diff,posteriors[case].time),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=hl4)
 
-    range = posteriors[case][:,["P_joint_min","P_joint_max","Posterior_min","Posterior_max","time"]]
-    df_P_joint = DataFrame(hcat(posteriors[case].Method,P_joint_diff,posteriors[case].time),vcat("Pjoint diff",posteriors[case].Method,"time"))
-    df_posterior = DataFrame(hcat(posteriors[case].Method,posterior_diff,posteriors[case].time),vcat("Posterior diff",posteriors[case].Method,"time"))
-    println(df_posterior)
+    range = posteriors[case][:,["P_joint_min","P_joint_max","Posterior_min","Posterior_max","time"]];
+    df_P_joint = DataFrame(hcat(posteriors[case].Method,P_joint_diff,posteriors[case].time),vcat("Pjoint diff",posteriors[case].Method,"time"));
+    df_posterior = DataFrame(hcat(posteriors[case].Method,posterior_diff,posteriors[case].time),vcat("Posterior diff",posteriors[case].Method,"time"));
+
     if save
         CSV.write("variables/patient_404/methods_diff_case_$(parse(Int,case[end]))_range.csv",range)
         CSV.write("variables/patient_404/methods_diff_case_$(parse(Int,case[end]))_P_joint.csv",df_P_joint)
@@ -133,9 +136,9 @@ function print_posteriors(posteriors,case,m; lim1=1e-17, lim2=1e-6, save=false)
 end 
 
 # Calling the printing function for the different cases 
-print_posteriors(posteriors,"case 1",7,save=true)
-print_posteriors(posteriors,"case 2",8,save=true)
-print_posteriors(posteriors,"case 3",9,save=true)
+print_posteriors(posteriors,"case 1",7,save=false)
+print_posteriors(posteriors,"case 2",8,save=false)
+print_posteriors(posteriors,"case 3",9,save=false)
 
 case = "case 1"
 posterior_diff = Float64.(maximum(abs,reshape(reduce(hcat,posteriors[case].Posterior),(size(posteriors[case].Posterior[1])[1],size(posteriors[case].Posterior)[1],1)) .- reshape(reduce(hcat,posteriors[case].Posterior),(size(posteriors[case].Posterior[1])[1],1,size(posteriors[case].Posterior)[1])),dims=1)[1,:,:])

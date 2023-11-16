@@ -25,10 +25,11 @@ function quickscore_Fortran(previn,pfmin,pfminneg;method="prod")
 end
 
 
-previn = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_3_previn.csv",header=false)))[:,1]
-pfmin = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_3_pfmin.csv",header=false)))
-pfminneg = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_3_pfminneg.csv",header=false)))[:,1]
+previn = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_2_previn.csv",header=false)))[:,1]
+pfmin = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_2_pfmin.csv",header=false)))
+pfminneg = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_2_pfminneg.csv",header=false)))[:,1]
 P_joint, posterior, dt = quickscore(previn,pfmin,pfminneg,"prod BF")
 
-P_joint
+
+
 
