@@ -9,6 +9,7 @@ function loop_term(myset,pfmin,prevminneg,prev,method)
     elseif  method in ["prod"];                         term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
     elseif  method in ["prod prod1"];                   term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2);  
     elseif  method in ["prod Fl32"];                    term = ((-1)^length(myset)) .* prod(Float32(1e-50) .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
+    elseif  method in ["prod QM Fl128"];                   term = ((-1)^length(myset)) .* prod(Float128(1e-50) .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
     elseif  method in ["prod BF(entire term)"];         term = BigFloat.(((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2));
     elseif  method in ["prod BF","prod BF Fl64","prod BF Fl128"];   term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(BigFloat.(pfmin)[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
     elseif  method in ["exp-sum-log BF"];               term = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(BigFloat.(pfmin)[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2)); 
@@ -25,8 +26,9 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
     pfplus = zeros(Float64,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
     
     if      occursin("Fl32",method);    previn, pfmin, prevminneg, prev, pfplus = Float32.(previn), Float32.(pfmin), Float32.(prevminneg), Float32.(prev), Float32.(pfplus)
+    elseif  occursin("QM Fl128",method);previn, pfmin, prevminneg, prev, pfplus = Float128.(previn), Float128.(pfmin), Float128.(prevminneg), Float128.(prev), Float128.(pfplus)
     elseif  occursin("Fl64",method);    setprecision(BigFloat,53)
-    elseif  occursin("Fl128",method);   setprecision(BigFloat,113)
+    elseif  occursin("BF Fl128",method);setprecision(BigFloat,113)
     else;                               setprecision(BigFloat,256)
     end
     
@@ -37,6 +39,9 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
                 v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
                 myset = findall(v.==1) # find places of the 1-elements
                 pfplus = pfplus .+ loop_term(myset,pfmin,prevminneg,prev,method)
+
+                # term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(BigFLoat.(pfmin[myset, :]),dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
+
             end
         end
     else

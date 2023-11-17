@@ -10,7 +10,7 @@ function get_patient_data()
     posterior_alisa, P_joint_alisa, dt_alisa = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
     posterior_alisa_hp, P_joint_alisa_hp, dt_alisa_hp = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
     posterior_cpp, P_joint_cpp, dt_cpp = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
-    posterior_fortran, P_joint_fortran, dt_fortran = Dict{String,Vector{Float64}}(), Dict{String,Vector{Float64}}(), Dict{String,Float64}()
+    posterior_fortran, P_joint_fortran, dt_fortran = Dict{String,Vector{BigFloat}}(), Dict{String,Vector{BigFloat}}(), Dict{String,Float64}()
     for case_nr=1:3
         # Get the raw data from the function in the C++ folder
         patient_cases_raw, data_alisa, previn, pfmin, pfminneg = prepare_patient_data("case $case_nr")
@@ -27,8 +27,8 @@ function get_patient_data()
         P_joint_cpp["case $case_nr"] = Float64.(readdlm("variables/cpp/cpp_output_case_$case_nr.csv",',')[2:end,2])
         dt_cpp["case $case_nr"] = readdlm("variables/cpp/cpp_output_case_$case_nr.csv",',')[2,3]
         # Load Fortran
-        posterior_fortran["case $case_nr"] = Float64.(readdlm("variables/fortran_patient404/output_case_$case_nr.csv")[1:end,1])
-        P_joint_fortran["case $case_nr"] = Float64.(readdlm("variables/fortran_patient404/output_case_$case_nr.csv")[1:end,2])
+        posterior_fortran["case $case_nr"] = readdlm("variables/fortran_patient404/output_case_$case_nr.csv",BigFloat)[1:end,1]
+        P_joint_fortran["case $case_nr"] = readdlm("variables/fortran_patient404/output_case_$case_nr.csv",BigFloat)[1:end,2]
         dt_fortran["case $case_nr"] = readdlm("variables/fortran_patient404/output_case_$case_nr.csv")[1,3]
     end
     # Load my own MATLAB run 
@@ -95,7 +95,7 @@ end
 # Retrieve the data from the patient cases and others
 method_others, posterior_others, P_joint_others, dt_others = get_patient_data();
 # Running the function for the different cases m=7,8,9
-quickscore_methods = ["exp-sum-log","prod","prod Fl32","exp-sum-log Fl32"]#,"prod BF","prod BF Fl128"]#,"prod BF Fl64","exp-sum-log BF"];
+quickscore_methods = ["exp-sum-log","prod","prod QM Fl128","prod BF","prod BF Fl128"]#,"prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
 posteriors = Dict{String,DataFrame}(
     "case 1" => posteriors_func("case 1",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others),
     "case 2" => posteriors_func("case 2",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others),
@@ -116,11 +116,11 @@ function print_posteriors(posteriors,case,m; lim1=1e-17, lim2=1e-6, save=false)
     hl4 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (abs(d[i, j]) < lim2 && d[i,j]!=0) : false, crayon"green")
     
     println("############################################## $case (m=$m) ##############################################")
-    println("############################################## range of P_joint and Posterior between methods ##############################################")
+    println("######################################################### P_joint & Posterior range ########################################################")
     pretty_table(posteriors[case][:,["nr","Method","P_joint_min","P_joint_max","Posterior_min","Posterior_max"]],alignment=:l,highlighters=(hl1,hl2))
-    println("############################################## max-abs diffference of P_joint between methods ##############################################")
+    println("########################################################### P_joint (max-abs diff) ###########################################################")
     pretty_table(hcat(P_joint_diff,posteriors[case].time),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=hl3)
-    println("########################################### max-abs diffference of Posterior between methods ###########################################")
+    println("########################################################### posterior (max-abs diff) ###########################################################")
     pretty_table(hcat(posterior_diff,posteriors[case].time),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=hl4)
 
     range = posteriors[case][:,["P_joint_min","P_joint_max","Posterior_min","Posterior_max","time"]];

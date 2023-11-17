@@ -1,4 +1,7 @@
 ! gfortran e.\ quickscore_run.f90 -o e.\ quickscore_run
+! ./e.\ quickscore_run 1
+! ./e.\ quickscore_run 2
+! ./e.\ quickscore_run 3
 
 program QuickScoreFortran
   implicit none
@@ -74,6 +77,8 @@ program QuickScoreFortran
   end do
 
 
+  ! term = product(pfmin(myset,:),dim=1)
+  ! term = (-1)**size(myset)*product(1e-50 + pfmin_matrix(1,:,:) * prevminneg + (1-prev),dim=2)
 
   pfplus = 0
   call cpu_time(t1)
@@ -123,9 +128,9 @@ program QuickScoreFortran
   open(newunit=file_output, file=output_path, action="write", status="replace", iostat=rc_output)
   do i = 1, n
     if (i==1) then
-      write(file_output, advance='NO') posterior(i), P_joint(i), dt
+      write(file_output, *) posterior(i), P_joint(i), dt
     else
-      write(file_output, *) posterior(i), P_joint(i)
+      write(file_output, *) posterior(i), P_joint(i), 0
     end if
   end do
   print *, "output_path:", output_path

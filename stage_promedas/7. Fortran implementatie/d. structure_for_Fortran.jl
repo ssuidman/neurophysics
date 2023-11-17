@@ -14,7 +14,9 @@ function quickscore_Fortran(previn,pfmin,pfminneg;method="prod")
             v = digits(i,base=2,pad=m) 
             myset = findall(v.==1) 
             # pfplus = pfplus + ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
-            pfplus = pfplus + ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
+            # pfplus = pfplus + ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
+            pfplus = pfplus + ((-1)^length(myset)) .* prod(1e-50 .+ (prod(BigFloat.(pfmin[myset, :]),dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
+            # pfplus = pfplus + ((-1)^length(myset)) .* prod(1e-50 .+ (BigFloat.(pfmin[[1], :]) .* prevminneg .+ (1 .- prev)),dims=2); 
         end
     end
     println("\nRunning time: $dt")
@@ -24,12 +26,28 @@ function quickscore_Fortran(previn,pfmin,pfminneg;method="prod")
     return P_joint, posterior, dt 
 end
 
+P_joint, posterior, dt = quickscore_Fortran(previn,pfmin,pfminneg)
 
-previn = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_2_previn.csv",header=false)))[:,1]
-pfmin = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_2_pfmin.csv",header=false)))
-pfminneg = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_2_pfminneg.csv",header=false)))[:,1]
+
+
+previn = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_1_previn.csv",header=false)))[:,1]
+pfmin = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_1_pfmin.csv",header=false)))
+pfminneg = Matrix(DataFrame(CSV.File("variables/cpp/patient404_case_1_pfminneg.csv",header=false)))[:,1]
 P_joint, posterior, dt = quickscore(previn,pfmin,pfminneg,"prod BF")
 
+
+
+
+precision(Float128)
+x = rand(100,101)
+y = BigFloat.(x,precision=53)
+z = Float128.(rand(100,101))
+
+@btime prod(x,dims=1)
+@btime prod(y,dims=1)
+@btime prod(z,dims=1)
+
+include("../packages.jl")
 
 
 
