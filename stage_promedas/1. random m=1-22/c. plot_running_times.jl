@@ -1,5 +1,5 @@
-include("../packages.jl")
-include("../run_one_time.jl")
+include("../0. useful/packages.jl")
+include("../0. useful/run_one_time.jl")
 matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
 m_variables_dir = "variables/random_m_1_22/"
 figure_dir = "figures/"

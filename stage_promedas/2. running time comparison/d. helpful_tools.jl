@@ -1,7 +1,7 @@
 # This file shows some profiling tools that can be helpful
-include("../packages.jl")
-include("../quickscore_algorithm.jl")
-include("../run_one_time.jl")
+include("../0. useful/packages.jl")
+include("../0. useful/quickscore_algorithm.jl")
+include("../0. useful/run_one_time.jl")
 
 println("Do not run this file in the terminal!!!")
 # Get variables for a random case m=17

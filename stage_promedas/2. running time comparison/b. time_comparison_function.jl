@@ -4,8 +4,8 @@
 # @benchmark log.(rand(101,100))
 # julia --trace-compile=stderr main.jl 
 
-include("../packages.jl") 
-include("../quickscore_algorithm.jl") 
+include("../0. useful/packages.jl") 
+include("../0. useful/quickscore_algorithm.jl") 
 
 # THIS IS A COMPARISON BETWEEN MOST IMPORTANT LINES 
 function f(method) 

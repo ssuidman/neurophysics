@@ -1,6 +1,6 @@
-include("../packages.jl")
-include("../quickscore_algorithm.jl")
-include("../run_one_time.jl")
+include("../0. useful/packages.jl")
+include("../0. useful/quickscore_algorithm.jl")
+include("../0. useful/run_one_time.jl")
 
 previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=18,n_myset=5,language="Julia");
 myset = [1,2,4,7,10]; # just like in MATLAB

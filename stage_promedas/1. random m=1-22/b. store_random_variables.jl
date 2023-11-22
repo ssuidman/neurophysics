@@ -1,6 +1,6 @@
-include("../packages.jl")
+include("../0. useful/packages.jl")
+include("../0. useful/quickscore_algorithm.jl")
 include("a. quickscore_preparation.jl")
-include("../quickscore_algorithm.jl")
 matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"
 m_variables_dir = "variables/random_m_1_22/"
 
@@ -14,7 +14,7 @@ function store_random_pfmin(matlab_dir,m_variables_dir)
     """
     Random.seed!(1234)
     for i in 1:22
-        previn, pfmin, pfminneg = quickscore_preparation(i)
+        previn, pfmin, pfminneg, sens, sensneg, prevminneg = quickscore_preparation(i)
 
         # Write variables to jld-file 
         jldopen(m_variables_dir*"m_$i.jld","w") do file

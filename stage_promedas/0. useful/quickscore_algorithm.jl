@@ -5,6 +5,7 @@ function loop_term(myset,pfmin,prevminneg,prev,method)
     if      method in ["exp-sum-log"];                  term = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
     elseif  method in ["exp-sum-log prod1"];            term = ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
     elseif  method in ["exp-sum-log Fl32"];             term = ((-1)^length(myset)) .* exp.(sum(log.(Float32(1e-50) .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
+    elseif  method in ["exp-sum-log QM Fl128"];         term = ((-1)^length(myset)) .* exp.(sum(log.(Float128(1e-50) .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2));
     elseif  method in ["exp-sum-log BF(entire term)"];  term = BigFloat.(((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2)));
     elseif  method in ["prod"];                         term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
     elseif  method in ["prod prod1"];                   term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)),dims=2);  
@@ -40,7 +41,7 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
                 myset = findall(v.==1) # find places of the 1-elements
                 pfplus = pfplus .+ loop_term(myset,pfmin,prevminneg,prev,method)
 
-                # term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(BigFLoat.(pfmin[myset, :]),dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
+                # term = ((-1)^length(myset)) .* prod(1e-50 .+ (prod(BigFloat.(pfmin[myset, :]),dims=1) .* prevminneg .+ (1 .- prev)),dims=2); 
 
             end
         end
@@ -62,11 +63,10 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
     end
 
     P_joint = pfplus[2:end,1] .* previn
-    posterior = P_joint / pfplus[1] 
+    posterior = P_joint / pfplus[1,1] 
     println("\nRunning time: $dt")
     return pfplus, P_joint, posterior, dt 
 end 
-# previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=17,n_myset=3,language="Julia");
 # pfplus_, P_joint_, posterior_,dt_ = quickscore(previn, pfmin, pfminneg,"prod");  
 
 

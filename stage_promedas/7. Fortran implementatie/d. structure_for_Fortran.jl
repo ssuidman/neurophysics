@@ -1,5 +1,5 @@
-include("../packages.jl")
-include("../quickscore_algorithm.jl")
+include("../0. useful/packages.jl")
+include("../0. useful/quickscore_algorithm.jl")
 
 function quickscore_Fortran(previn,pfmin,pfminneg;method="prod")
     m,n = !isempty(pfmin) ? size(pfmin) : (0, length(previn)) # m number of postests. n number of diags. if size(postest) is 0, then we set m=0 `` 

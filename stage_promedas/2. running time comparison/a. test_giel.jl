@@ -1,4 +1,4 @@
-include("../packages.jl")
+include("../0. useful/packages.jl")
 
 function test_giel(method::String)
     """
