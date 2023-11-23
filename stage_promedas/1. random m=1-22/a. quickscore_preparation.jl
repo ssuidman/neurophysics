@@ -44,7 +44,7 @@ function quickscore_preparation(m_wanted;n_disease=100,n_test=30,expected_number
     for i in 1:n prev[i+1,i]=1 end # set the (i+1,i) entry 1 to condition on d_i=1,  etc. 
     prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)
     
-    return previn, pfmin, pfminneg, sens, sensneg, prevminneg
+    return previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg
 end 
 
 

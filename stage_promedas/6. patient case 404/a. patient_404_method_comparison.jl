@@ -42,11 +42,11 @@ function get_patient_data()
         end
     close(matfile)
 
-    methods_others = ["Matlab Sam","Matlab Alisa","Matlab Alisa hp","C++","Fortran"]
+    methods_others = ["Matlab Sam","Matlab","Matlab hp","C++","Fortran"]
     posterior_others = [posterior_matlab,posterior_alisa,posterior_alisa_hp,posterior_cpp,posterior_fortran]
     P_joint_others = [P_joint_matlab,P_joint_alisa,P_joint_alisa_hp,P_joint_cpp,P_joint_fortran]
     dt_others = [dt_matlab,dt_alisa,dt_alisa_hp,dt_cpp,dt_fortran]
-    return methods_others, posterior_others, P_joint_others, dt_others
+    return methods_others[2:end], posterior_others[2:end], P_joint_others[2:end], dt_others[2:end]
 end
 
 function posteriors_func(case,methods,methods_others,posterior_others,P_joint_others,dt_others)
@@ -75,7 +75,7 @@ function posteriors_func(case,methods,methods_others,posterior_others,P_joint_ot
     # Run the quickscore algorithm for methods in Julia and store it in the DataFrame
     for (i,method) in enumerate(methods)
         pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg, method)
-        push!(posteriors, (nr = i+size(method_others)[1],
+        push!(posteriors, (nr = i+size(methods_others)[1],
             Method = method, 
             Posterior_min = minimum(posterior),
             Posterior_max = maximum(posterior),
@@ -96,11 +96,11 @@ end
 # Retrieve the data from the patient cases and others
 methods_others, posterior_others, P_joint_others, dt_others = get_patient_data();
 # Running the function for the different cases m=7,8,9
-quickscore_methods = ["exp-sum-log","prod","prod QM Fl128","prod BF"]#,"exp-sum-log QM Fl128","prod BF Fl128"]#,"prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
+quickscore_methods = ["exp-sum-log","prod","prod QM Fl128","prod QM Fl128 thread","prod BF","prod BF thread"]#,"exp-sum-log QM Fl128","prod BF Fl128"]#,"prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
 posteriors = Dict{String,DataFrame}(
-    "case 1" => posteriors_func("case 1",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others),
-    "case 2" => posteriors_func("case 2",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others),
-    "case 3" => posteriors_func("case 3",quickscore_methods,method_others,posterior_others,P_joint_others,dt_others)
+    # "case 1" => posteriors_func("case 1",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
+    # "case 2" => posteriors_func("case 2",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
+    "case 3" => posteriors_func("case 3",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others)
 )
 
 # Function that prints the data I want in nice tables
@@ -143,5 +143,10 @@ end
 range_7, P_joint_diff_7, posterior_diff_7 = print_posteriors(posteriors,"case 1",7,save=false);
 range_8, P_joint_diff_8, posterior_diff_8 = print_posteriors(posteriors,"case 2",8,save=false);
 range_9, P_joint_diff_9, posterior_diff_9 = print_posteriors(posteriors,"case 3",9,save=false);
+
+
+
+
+
 
 

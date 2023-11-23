@@ -14,7 +14,7 @@ function store_random_pfmin(matlab_dir,m_variables_dir)
     """
     Random.seed!(1234)
     for i in 1:22
-        previn, pfmin, pfminneg, sens, sensneg, prevminneg = quickscore_preparation(i)
+        previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(i)
 
         # Write variables to jld-file 
         jldopen(m_variables_dir*"m_$i.jld","w") do file
