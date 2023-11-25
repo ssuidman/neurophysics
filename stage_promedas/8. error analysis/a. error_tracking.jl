@@ -68,10 +68,8 @@ end
 posterior = pfplus[2:end,1] .* previn ./ pfplus[1,1]
 posterior_BF = pfplus_BF[2:end,1] .* previn ./ pfplus_BF[1,1]
 
-
 posterior[369-2:369+2]
 posterior_BF[369-2:369+2]
-
 
 pfplus_BF[2:end,1] .* previn ./ denominators
 
@@ -92,14 +90,6 @@ t4 = t3 * 2^m
 
 
 
-
-myset = [1,2,3,4,5]
-maximum(prod(pfmin[myset, :],dims=1))
-maximum(prod(BigFloat.(pfmin[myset, :]),dims=1))
-
-
-
-
 for (i,post) in enumerate(Float64.(posterior))
     if Float64.(abs.(post.-posterior_BF[i])) > 0.0001
     # if post > 1 || post < 0
@@ -115,31 +105,107 @@ end
 
 
 
-x1 = 1 ./ eps(Float64)^2
-# x2 = BigFloat(1.1)^2e-16
-# x3 = x2 - x1
-
-significand(x1)
-exponent(x1)    
-
-
-# include("../0. useful/run_one_time.jl")
-# previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=17,n_myset=3,language="Julia");
-
-######## HIER VERDER!!!!! #########
+include("../0. useful/run_one_time.jl")
 include("../1. random m=1-22/a. quickscore_preparation.jl")
 include("../0. useful/quickscore_algorithm.jl")
 include("../5. C++ test/a. cpp_preparation_functions.jl")
+# previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=17,n_myset=3,language="Julia");
 patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 1");
-# previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(9,n_disease=773);
-pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"exp-sum-log BF",threading=true);  
+pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"prod BF"); println(typeof(posterior)); 
+
+
+m = 18
+previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(m,n_disease=1000);
+v_ = digits.(0:2^m-1,base=2,pad=m)
+myset_ = Vector{Vector{Int64}}(undef, 2^m)
+pfmin_prod = Array{Float64,3}(undef,(2^m,1,size(pfmin,2)))
+for i in ProgressBar(1:2^m)
+    myset_[i] = findall(v_[i].==1)
+    pfmin_prod[i,:,:] = prod(pfmin[myset_[i],:],dims=1)
+end
+myset = myset_[100]
+println("Sizes:"," myset: ",size(myset)," pfmin: ",size(pfmin)," prevminneg: ",size(prevminneg)," prev: ",size(prev))
+
+
+
+println("a1");  @btime a1 = pfmin[myset, :]; a1 = pfmin[myset, :]; 
+println("a2");  @btime a2 = prod(a1, dims=1); a2 = prod(a1, dims=1);
+println("b");   @btime b = prevminneg; b = prevminneg; 
+println("1 - prev");   @btime c = 1 .- prev; c = 1 .- prev; # This step takes long (161 μs)
+println("prod(pfmin) * prevminneg");   @btime d = a2 .* b; d = a2 .* b; # This step takes long (162 μs)
+println("prof(pfmin)*prevminneg + (1-prev)");   @btime e = d .+ c;    e = d .+ c; # This step takes long (258 μs)
+println("prod(inner_term)");   @btime f = prod(e,dims=2); f = prod(e,dims=2); # This step takes long (145 μs)
+println("g");   @btime g = ((-1)^length(myset)); g = ((-1)^length(myset)); 
+println("h");   @btime h = g .* f; h = g .* f; 
 
 
 
 
-Profile.init()
-@profile pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"prod QM Fl128",threading=true);  
-Profile.print()
+##### HIER VERDER!!! #####
+include("../0. useful/run_one_time.jl")
+include("../1. random m=1-22/a. quickscore_preparation.jl")
+include("../0. useful/quickscore_algorithm.jl")
+include("../5. C++ test/a. cpp_preparation_functions.jl")
+# previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=17,n_myset=3,language="Julia");
+patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 1");
+pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"prod BF"); println(typeof(posterior)); 
+
+
+# previn, pfminneg, pfmin = [BigFloat.(x) for x in [previn, pfminneg, pfmin]]
+# prev = repeat(previn',inner=(n+1,1)) # copies of prevalences
+# for i in 1:n prev[i+1,i]=1 end # set the (i+1,i) entry 1 to condition on d_i=1,  etc. 
+# prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)
+prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn')
+prevminneg = prev .* pfminneg'
+
+
+x1 = prod(pfmin[myset,:],dims=1) .* prevminneg .+ (1 .- previn')
+x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- previn') .+ prod_pfmin .* pfminneg' .* (1 .- previn') .* [zeros(n) I(n)]' 
+x1 - x2
+
+x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- previn')  .- prod_pfmin .* previn' .* pfminneg' .* [zeros(n) I(n)]' .* (1 .- previn') .+ prod_pfmin .* pfminneg' .* (1 .- previn') .* [zeros(n) I(n)]' 
+
+# x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- prev) .+ prod_pfmin .* pfminneg' .* (1 .- previn') .* [zeros(n) I(n)]' 
+x1 = prod(pfmin[myset,:],dims=1) .* prevminneg .+ (1 .- prev)
+x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- previn') .+ (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn') .* [zeros(n) I(n)]' 
+
+
+
+
+x3 = A .+ B .* I0
+x4 = prod(A) .* [1 ; (A .+ B)' ./ A']
+
+
+
+
+x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- previn') .+ (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn') .* [zeros(n) I(n)]' 
+
+previn, pfminneg, pfmin = [BigFloat.(x) for x in [previn, pfminneg, pfmin]]
+prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn')
+prevminneg = prev .* pfminneg'
+prod_pfmin = prod(pfmin[myset,:],dims=1) 
+previn_pfminneg = previn' .* pfminneg' 
+one_min_previn = 1 .- previn'
+pfminneg_min_previn = pfminneg' .- previn'
+for i in 0:2^m-1
+    v = digits(i,base=2,pad=m)
+    myset = findall(v .== 1)
+    A = prod_pfmin .* previn_pfminneg .+ one_min_previn
+    B = (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn')
+    result_new = prod(A) .* [1 ; (A .+ B)' ./ A']
+    result_old = prod(prod(pfmin[myset,:],dims=1) .* prevminneg .+ (1 .- prev),dims=2)
+    println(maximum(abs,result_new .- result_old))
+end
+result_new
+
+
+I0 = [zeros(n) I(n)]'
+inner_term = A .+ B .* I0
+
+
+
+
+
 
 
 

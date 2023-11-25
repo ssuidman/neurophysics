@@ -46,7 +46,7 @@ function get_patient_data()
     posterior_others = [posterior_matlab,posterior_alisa,posterior_alisa_hp,posterior_cpp,posterior_fortran]
     P_joint_others = [P_joint_matlab,P_joint_alisa,P_joint_alisa_hp,P_joint_cpp,P_joint_fortran]
     dt_others = [dt_matlab,dt_alisa,dt_alisa_hp,dt_cpp,dt_fortran]
-    return methods_others[2:end], posterior_others[2:end], P_joint_others[2:end], dt_others[2:end]
+    return methods_others[[2,3]], posterior_others[[2,3]], P_joint_others[[2,3]], dt_others[[2,3]]
 end
 
 function posteriors_func(case,methods,methods_others,posterior_others,P_joint_others,dt_others)
@@ -96,11 +96,11 @@ end
 # Retrieve the data from the patient cases and others
 methods_others, posterior_others, P_joint_others, dt_others = get_patient_data();
 # Running the function for the different cases m=7,8,9
-quickscore_methods = ["exp-sum-log","prod","prod QM Fl128","prod QM Fl128 thread","prod BF","prod BF thread"]#,"exp-sum-log QM Fl128","prod BF Fl128"]#,"prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
+quickscore_methods = ["exp-sum-log","prod","prod Fl128","prod Fl128 1-prev","prod Fl128 thread","prod BF","prod BF thread"]#,"exp-sum-log QM Fl128","prod BF Fl128"]#,"prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
 posteriors = Dict{String,DataFrame}(
-    # "case 1" => posteriors_func("case 1",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
+    "case 1" => posteriors_func("case 1",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
     # "case 2" => posteriors_func("case 2",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
-    "case 3" => posteriors_func("case 3",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others)
+    # "case 3" => posteriors_func("case 3",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others)
 )
 
 # Function that prints the data I want in nice tables

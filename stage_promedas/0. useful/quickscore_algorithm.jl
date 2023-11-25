@@ -2,21 +2,12 @@ include("packages.jl")
 include("useful_functions.jl")
 
 
-function loop_term(myset::Vector{Int64},pfmin::Matrix{T},prevminneg::Matrix{T},prev::Matrix{T},method::String) where {T <: Real}
-    if      method in ["exp-sum-log","exp-sum-log Fl32","exp-sum-log QM Fl128"];    term = ((-1)^length(myset)) .* exp.(sum(log.(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2));
-        # elseif  method in ["exp-sum-log Fl32"];                     term = ((-1)^length(myset)) .* exp.(sum(log.(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2));
-        # elseif  method in ["exp-sum-log QM Fl128"];                 term = ((-1)^length(myset)) .* exp.(sum(log.(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2));
-    elseif  method in ["exp-sum-log prod1"];                    term = ((-1)^length(myset)) .* exp.(sum(log.(prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2));
-    elseif  method in ["exp-sum-log BF(entire term)"];          term = BigFloat.(((-1)^length(myset)) .* exp.(sum(log.(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2)));
-        # elseif  method in ["prod","prod Fl32","prod QM Fl128","prod QM Fl128 thread","prod thread"];  term = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2); 
-    elseif  occursin("prod",method);    term = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2); 
-    elseif  occursin("exp-sum-log",method);    term = ((-1)^length(myset)) .* exp.(sum(log.(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2));
-    # elseif  method in ["prod Fl32"];                            term = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2); 
-    # elseif  method in ["prod QM Fl128","prod QM Fl128 thread"]; term = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2); 
-    elseif  method in ["prod prod1"];                           term = ((-1)^length(myset)) .* prod(prod1(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2);  
-    elseif  method in ["prod BF(entire term)"];                 term = BigFloat.(((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2));
-    # elseif  method in ["prod BF","prod BF Fl64","prod BF Fl128","prod BF thread"];   term = ((-1)^length(myset)) .* prod(prod(BigFloat.(pfmin)[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2); 
-    # elseif  method in ["exp-sum-log BF","exp-sum-log BF thread"];               term = ((-1)^length(myset)) .* exp.(sum(log.(prod(BigFloat.(pfmin)[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2)); 
+function loop_term(myset::Vector{Int64},pfmin::Matrix{T},prevminneg::Matrix{T},prev::Matrix{T},prev_min_1::Matrix{T},method::String) where {T <: Real}
+    if  occursin("prod",method) && !occursin("1-prev",method);              term = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ prev_min_1,dims=2); 
+    elseif  occursin("exp-sum-log",method) && !occursin("1-prev",method);   term = ((-1)^length(myset)) .* exp.(sum(log.(prod(pfmin[myset, :],dims=1) .* prevminneg .+ prev_min_1), dims=2));
+    elseif  occursin("prod",method) && occursin("1-prev",method);           term = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2); 
+    elseif  occursin("exp-sum-log",method) && occursin("1-prev",method);    term = ((-1)^length(myset)) .* exp.(sum(log.(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2)); 
+    elseif  occursin("prod",method) && occursin("entire term",method);      term = BigFloat.(((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ prev_min_1,dims=2));
     end
     return term
 end
@@ -24,38 +15,44 @@ end
 function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::Vector{Float64}, method::String; threading::Bool=false)
     m,n = !isempty(pfmin) ? size(pfmin) : (0, length(previn)) # m number of postests. n number of diags. if size(postest) is 0, then we set m=0 `` 
     println("m = $m (postive tests)")
-    prev = repeat(previn',inner=(n+1,1)) # copies of prevalences
-    for i in 1:n prev[i+1,i]=1 end # set the (i+1,i) entry 1 to condition on d_i=1,  etc. 
+    prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn')
     prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)
-    # pfplus = zeros(Float64,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
-    pfplus = zeros(Float64,2^m,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
-    
-    if      occursin("Fl32",method);    previn, pfmin, prevminneg, prev, pfplus = [Float32.(x) for x in [previn, pfmin, prevminneg, prev, pfplus]]; 
-    elseif  occursin("QM Fl128",method);previn, pfmin, prevminneg, prev, pfplus = [Float128.(x) for x in [previn, pfmin, prevminneg, prev, pfplus]]; 
-    elseif  occursin("Fl64",method);    setprecision(BigFloat,53); 
-    elseif  occursin("BF",method)       setprecision(BigFloat,256); previn, pfmin, prevminneg, prev, pfplus = [BigFloat.(x) for x in [previn, pfmin, prevminneg, prev, pfplus]]; 
-    elseif  occursin("BF Fl128",method);setprecision(BigFloat,113); previn, pfmin, prevminneg, prev, pfplus = [BigFloat.(x) for x in [previn, pfmin, prevminneg, prev, pfplus]]; 
+    pfplus = zeros(Float64,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
+    pfplus_matrix = zeros(Float64,2^m,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
+
+    if      occursin("Fl32",method);                            previn, pfmin, prevminneg, prev, pfplus, pfplus_matrix = [Float32.(x) for x in [previn, pfmin, prevminneg, prev, pfplus, pfplus_matrix]]; 
+    elseif  occursin("Fl128",method) && !occursin("BF",method); previn, pfmin, prevminneg, prev, pfplus, pfplus_matrix = [Float128.(x) for x in [previn, pfmin, prevminneg, prev, pfplus, pfplus_matrix]]; 
+    elseif  occursin("BF",method)                               previn, pfmin, prevminneg, prev, pfplus, pfplus_matrix = [BigFloat.(x) for x in [previn, pfmin, prevminneg, prev, pfplus, pfplus_matrix]]; 
+        if  occursin("Fl128",method); setprecision(BigFloat,113); elseif occursin("Fl64",method); setprecision(BigFloat,53); else; setprecision(BigFloat,256); end; 
     end
 
-    if occursin("thread",method); threading = true; end; 
-
+    if occursin("thread",method); threading = true;  end; 
+        
+    prev_min_1 = (1 .- previn')
+    
+    previn_pfminneg = previn' .* pfminneg' 
+    one_min_previn = 1 .- previn'
+    pfminneg_min_previn = pfminneg' .- previn'
     if method!="MATLAB"
         println("Method: '$method'")
         dt = @elapsed begin
             if threading
+                println("Multi-threading: $(Threads.nthreads()) threads");
                 Threads.@threads for i in ProgressBar(0:(2^m-1)) # In VS Code --> settings (left below) --> choose settings --> type in "Julia: Num Threads" and click "Edit in settings.json" --> set '"julia.NumThreads": 4' (if you want to use 4 threads, which is maximum for my macbook)
                     v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
                     myset = findall(v.==1) # find places of the 1-elements
-                    pfplus[i+1,:,:] = loop_term(myset,pfmin,prevminneg,prev,method)
-                    # pfplus[i+1,:,:] = rand(size(pfplus,2),size(pfplus,3))
-
+                    # pfplus_matrix[i+1,:,:] = loop_term(myset,pfmin,prevminneg,prev,prev_min_1,method)
                 end
             else
                 for i in ProgressBar(0:(2^m-1)) # iterate over 2^m possibilities 
                     v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
                     myset = findall(v.==1) # find places of the 1-elements
-                    # pfplus = pfplus .+ loop_term(myset,pfmin,prevminneg,prev,method)
-                    pfplus[i+1,:,:] = loop_term(myset,pfmin,prevminneg,prev,method)
+                    # pfplus_matrix[i+1,:,:] = loop_term(myset,pfmin,prevminneg,prev,prev_min_1,method)
+                    prod_pfmin = prod(pfmin[myset,:],dims=1) 
+                    A = prod_pfmin .* previn_pfminneg .+ one_min_previn
+                    B = (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn')
+                    pfplus_matrix[i+1,:,:] = prod(A) .* [1 ; (A .+ B)' ./ A']
+                    # pfplus = pfplus .+ loop_term(myset,pfmin,prevminneg,prev,prev_min_1,method)
                 end
             end
         end
@@ -75,7 +72,7 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
             end
         end
     end
-    pfplus = sum(pfplus,dims=1)[1,:,:]
+    pfplus = sum(pfplus_matrix,dims=1)[1,:,:]
     P_joint = pfplus[2:end,1] .* previn
     posterior = P_joint / pfplus[1,1] 
     println("Running time: $dt\n")

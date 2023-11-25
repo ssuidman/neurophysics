@@ -14,6 +14,7 @@ using Random
 using Octavian
 using LoopVectorization
 using ProgressBars
+using ProgressMeter
 using Printf
 using Random
 using DelimitedFiles
@@ -24,5 +25,6 @@ using CSV
 using ArbNumerics
 using PyCall
 using Quadmath
+using LinearAlgebra
 
 
