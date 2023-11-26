@@ -74,8 +74,8 @@ function posteriors_func(case,methods,methods_others,posterior_others,P_joint_ot
     )
     # Run the quickscore algorithm for methods in Julia and store it in the DataFrame
     for (i,method) in enumerate(methods)
-        pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg, method)
-        push!(posteriors, (nr = i+size(methods_others)[1],
+        pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg, method)
+        push!(posteriors, (nr = i+size(methods_others,1),
             Method = method, 
             Posterior_min = minimum(posterior),
             Posterior_max = maximum(posterior),
@@ -92,19 +92,18 @@ function posteriors_func(case,methods,methods_others,posterior_others,P_joint_ot
     return posteriors
 end
 
-
 # Retrieve the data from the patient cases and others
 methods_others, posterior_others, P_joint_others, dt_others = get_patient_data();
 # Running the function for the different cases m=7,8,9
-quickscore_methods = ["exp-sum-log","prod","prod Fl128","prod Fl128 1-prev","prod Fl128 thread","prod BF","prod BF thread"]#,"exp-sum-log QM Fl128","prod BF Fl128"]#,"prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
+quickscore_methods = ["exp-sum-log","prod","prod Fl128","prod Fl128 thread","prod BF","prod BF thread","trick BF","trick BF thread","trick Fl128 thread"]#,"exp-sum-log QM Fl128","prod BF Fl128"]#,"prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
 posteriors = Dict{String,DataFrame}(
-    "case 1" => posteriors_func("case 1",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
+    # "case 1" => posteriors_func("case 1",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
     # "case 2" => posteriors_func("case 2",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
-    # "case 3" => posteriors_func("case 3",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others)
+    "case 3" => posteriors_func("case 3",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others)
 )
 
 # Function that prints the data I want in nice tables
-function print_posteriors(posteriors,case,m; lim1=1e-17, lim2=1e-6, save=false)    
+function print_posteriors(posteriors,case,m; lim1=1e-17, lim2=1e-6, save=false) 
     """
     This function prints the results of a certain patient case (m=7,8,9) using the variable 'posteriors' that contains all the data in a compact way.
     Via 'lim1' / 'lim2' you can set the coloring limits to highlight which quickscore methods give sensible results. 

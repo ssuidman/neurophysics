@@ -142,68 +142,105 @@ println("h");   @btime h = g .* f; h = g .* f;
 
 
 ##### HIER VERDER!!! #####
-include("../0. useful/run_one_time.jl")
-include("../1. random m=1-22/a. quickscore_preparation.jl")
-include("../0. useful/quickscore_algorithm.jl")
-include("../5. C++ test/a. cpp_preparation_functions.jl")
+include("../0. useful/run_one_time.jl"); 
+include("../1. random m=1-22/a. quickscore_preparation.jl"); 
+include("../0. useful/quickscore_algorithm.jl"); 
+include("../5. C++ test/a. cpp_preparation_functions.jl"); 
 # previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=17,n_myset=3,language="Julia");
 patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 1");
-pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"prod BF"); println(typeof(posterior)); 
+pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"prod BF thread"); println(typeof(posterior)); 
+pfplus_matrix_, pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"trick BF"); println(typeof(posterior)); 
 
-
-# previn, pfminneg, pfmin = [BigFloat.(x) for x in [previn, pfminneg, pfmin]]
-# prev = repeat(previn',inner=(n+1,1)) # copies of prevalences
-# for i in 1:n prev[i+1,i]=1 end # set the (i+1,i) entry 1 to condition on d_i=1,  etc. 
-# prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)
-prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn')
-prevminneg = prev .* pfminneg'
-
-
-x1 = prod(pfmin[myset,:],dims=1) .* prevminneg .+ (1 .- previn')
-x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- previn') .+ prod_pfmin .* pfminneg' .* (1 .- previn') .* [zeros(n) I(n)]' 
-x1 - x2
-
-x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- previn')  .- prod_pfmin .* previn' .* pfminneg' .* [zeros(n) I(n)]' .* (1 .- previn') .+ prod_pfmin .* pfminneg' .* (1 .- previn') .* [zeros(n) I(n)]' 
-
-# x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- prev) .+ prod_pfmin .* pfminneg' .* (1 .- previn') .* [zeros(n) I(n)]' 
-x1 = prod(pfmin[myset,:],dims=1) .* prevminneg .+ (1 .- prev)
-x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- previn') .+ (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn') .* [zeros(n) I(n)]' 
+prev1 = previn' .+ [zeros(n) I(n)]' .* (1 .- previn'); 
+prev2 = BigFloat.(previn)' .+ [zeros(n) I(n)]' .* (1 .- BigFloat.(previn)'); 
 
 
 
+# Run one time 
+m,n = size(pfmin); 
+myset = [1,2,5,7]; 
+prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn'); 
+previn, pfminneg, pfmin, prev = [BigFloat.(x) for x in [previn, pfminneg, pfmin, prev]]; 
 
-x3 = A .+ B .* I0
-x4 = prod(A) .* [1 ; (A .+ B)' ./ A']
+prevminneg = prev .* pfminneg'; 
+prod_pfmin = prod(pfmin[myset,:],dims=1); 
+x_old = prod(pfmin[myset,:],dims=1) .* prevminneg .+ (1 .- prev); 
+x_new = prod_pfmin .* previn' .* pfminneg' .+ (1 .- previn') .+ (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn') .* [zeros(n) I(n)]'; 
+
+previn_pfminneg = previn' .* pfminneg'; 
+one_min_previn = 1 .- previn'; 
+pfminneg_min_previn = pfminneg' .- previn'; 
+
+y_old = ((-1)^length(myset)) .* prod(prod(pfmin[myset,:],dims=1) .* prevminneg .+ (1 .- prev),dims=2); 
+A = prod_pfmin .* previn_pfminneg .+ one_min_previn; 
+B = (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn'); 
+y_new = ((-1)^length(myset)) .* prod(A) .* [1 ; (A .+ B)' ./ A']; 
+sum(abs, x_new-x_old) 
+sum(abs, y_new-y_old)
 
 
 
 
-x2 = prod_pfmin .* previn' .* pfminneg' .+ (1 .- previn') .+ (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn') .* [zeros(n) I(n)]' 
+# Run quickscore algorithm 
+m,n = size(pfmin); # done
+prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn'); # done
+previn, pfminneg, pfmin, prev = [BigFloat.(x) for x in [previn, pfminneg, pfmin, prev]]; 
+prevminneg = prev .* pfminneg'; # done
 
-previn, pfminneg, pfmin = [BigFloat.(x) for x in [previn, pfminneg, pfmin]]
-prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn')
-prevminneg = prev .* pfminneg'
-prod_pfmin = prod(pfmin[myset,:],dims=1) 
-previn_pfminneg = previn' .* pfminneg' 
-one_min_previn = 1 .- previn'
-pfminneg_min_previn = pfminneg' .- previn'
+# previn, pfminneg, pfmin = [BigFloat.(x) for x in [previn, pfminneg, pfmin]]; # This line makes it different 
+
+pfplus_matrix_new = zeros(BigFloat,2^m,n+1,1); 
+pfplus_matrix_old = zeros(BigFloat,2^m,n+1,1); 
+
+previn_pfminneg = previn' .* pfminneg'; 
+one_min_previn = 1 .- previn'; 
+pfminneg_min_previn = pfminneg' .- previn'; 
+
+# s = 0
+# for i in ProgressBar(0:2^m-1)
 for i in 0:2^m-1
     v = digits(i,base=2,pad=m)
     myset = findall(v .== 1)
+    prod_pfmin = prod(pfmin[myset,:],dims=1) 
     A = prod_pfmin .* previn_pfminneg .+ one_min_previn
     B = (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn')
-    result_new = prod(A) .* [1 ; (A .+ B)' ./ A']
-    result_old = prod(prod(pfmin[myset,:],dims=1) .* prevminneg .+ (1 .- prev),dims=2)
-    println(maximum(abs,result_new .- result_old))
+    pfplus_matrix_new[i+1,:,:] = ((-1)^length(myset)) .* prod(A) .* [1 ; (A .+ B)' ./ A']
+    pfplus_matrix_old[i+1,:,:] = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2)
+    # result_old = ((-1)^length(myset)) .* prod(prod(pfmin[myset,:],dims=1) .* prevminneg .+ prev_min_1,dims=2); 
+    println(maximum(abs,pfplus_matrix_new[i+1,:,:] .- pfplus_matrix_old[i+1,:,:]))
+    # s = s .+ maximum(abs,result_new .- result_old)
 end
-result_new
-
-
-I0 = [zeros(n) I(n)]'
-inner_term = A .+ B .* I0
+sum(abs,pfplus_matrix_new .- pfplus_matrix_old)
 
 
 
+
+# Directly from the quickscore function 
+m,n = !isempty(pfmin) ? size(pfmin) : (0, length(previn)) # m number of postests. n number of diags. if size(postest) is 0, then we set m=0 `` 
+prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn')
+prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)
+
+pfplus_matrix_new = zeros(Float64,2^m,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
+pfplus_matrix_old = zeros(Float64,2^m,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
+
+previn, pfmin, prevminneg, prev, pfplus, pfplus_matrix_new, pfplus_matrix_old  = [BigFloat.(x) for x in [previn, pfmin, prevminneg, prev, pfplus, pfplus_matrix_new, pfplus_matrix_old]]; 
+
+previn_pfminneg = previn' .* pfminneg' 
+one_min_previn = 1 .- previn'
+pfminneg_min_previn = pfminneg' .- previn'
+
+dt = @elapsed begin
+    for i in ProgressBar(0:(2^m-1)) # iterate over 2^m possibilities 
+        v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
+        myset = findall(v.==1) # find places of the 1-elements
+        pfplus_matrix_old[i+1,:,:] = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2)
+        prod_pfmin = prod(pfmin[myset,:],dims=1) 
+        A = prod_pfmin .* previn_pfminneg .+ one_min_previn
+        B = (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn')
+        pfplus_matrix_new[i+1,:,:] = ((-1)^length(myset)) .* prod(A) .* [1 ; (A .+ B)' ./ A']
+    end
+end
+pfplus_matrix_old .- pfplus_matrix_new
 
 
 
