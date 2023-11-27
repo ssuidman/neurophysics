@@ -110,9 +110,12 @@ include("../1. random m=1-22/a. quickscore_preparation.jl")
 include("../0. useful/quickscore_algorithm.jl")
 include("../5. C++ test/a. cpp_preparation_functions.jl")
 # previn, pfmin, pfminneg, pfplus, P_joint, posterior, dt, prev, prevminneg, myset = run_one_time_var(m=17,n_myset=3,language="Julia");
-patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 1");
-pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"prod BF"); println(typeof(posterior)); 
+# patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 1");
+previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(20,n_disease=1000);
+pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"trick BF thread"); 
+pfplus_matrix_, pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"trick Fl128"); 
 
+posterior - posterior_
 
 m = 18
 previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(m,n_disease=1000);

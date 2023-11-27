@@ -47,11 +47,15 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
         dt = @elapsed begin
             if threading
                 println("Multi-threading: $(Threads.nthreads()) threads");
+                pfplus_matrix = [zeros(float_type,n+1,1) for i=1:Threads.nthreads()] 
                 Threads.@threads for i in ProgressBar(0:(2^m-1)) # In VS Code --> settings (left below) --> choose settings --> type in "Julia: Num Threads" and click "Edit in settings.json" --> set '"julia.NumThreads": 4' (if you want to use 4 threads, which is maximum for my macbook)
+                    # println('\n',i,'\n',i)
                     v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
                     myset = findall(v.==1) # find places of the 1-elements
-                    pfplus_matrix[i+1,:,:] = loop_term(myset,previn,pfmin,pfminneg,prevminneg,prev,previn_pfminneg,one_min_previn,pfminneg_min_previn,method)
+                    # pfplus_matrix[i+1,:,:] = loop_term(myset,previn,pfmin,pfminneg,prevminneg,prev,previn_pfminneg,one_min_previn,pfminneg_min_previn,method)
+                    pfplus_matrix[Threads.threadid()] = pfplus_matrix[Threads.threadid()] .+ loop_term(myset,previn,pfmin,pfminneg,prevminneg,prev,previn_pfminneg,one_min_previn,pfminneg_min_previn,method)
                 end
+                pfplus_matrix = permutedims(cat(pfplus_matrix...,dims=3),(3,1,2))
             else
                 for i in ProgressBar(0:(2^m-1)) # iterate over 2^m possibilities 
                     v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
