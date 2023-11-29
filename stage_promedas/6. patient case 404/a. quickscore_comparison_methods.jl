@@ -95,7 +95,7 @@ end
 # Retrieve the data from the patient cases and others
 methods_others, posterior_others, P_joint_others, dt_others = get_patient_data();
 # Running the function for the different cases m=7,8,9
-quickscore_methods = ["prod","prod BF","prod BF thread","prod Fl128","trick","trick BF","trick Fl128 thread"]#,"exp-sum-log","exp-sum-log Fl128","prod BF Fl128","prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
+quickscore_methods = ["prod","prod BF","prod BF thread","prod Fl128","trick","trick BF","trick BF thread","trick Fl128 thread"]#,"exp-sum-log","exp-sum-log Fl128","prod BF Fl128","prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
 posteriors = Dict{String,DataFrame}(
     # "case 1" => posteriors_func("case 1",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
     # "case 2" => posteriors_func("case 2",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
@@ -113,7 +113,7 @@ function print_posteriors(posteriors,case,m; lim1=1e-17, lim2=1e-6, save=false)
     hl1 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (d[i, j] >= 0 && d[i, j] <= 1) : false, crayon"green")
     hl2 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (d[i, j] <= 0 || d[i, j] >= 1) : false, crayon"red")
     hl3 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (abs(d[i, j]) < lim1 && d[i,j]!=0) : false, crayon"green")
-    hl4 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (abs(d[i, j]) > lim1 && d[i,j]!=0) : false, crayon"red")
+    # hl4 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (abs(d[i, j]) > lim1 && d[i,j]!=0) : false, crayon"red")
     hl5 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (abs(d[i, j]) < lim2 && d[i,j]!=0) : false, crayon"green")
     hl6 = Highlighter((d, i, j) -> typeof(d[i,j])==Float64 ? (abs(d[i, j]) > lim2 && d[i,j]!=0) : false, crayon"red")
     
@@ -121,7 +121,7 @@ function print_posteriors(posteriors,case,m; lim1=1e-17, lim2=1e-6, save=false)
     println("######################################################### P_joint & Posterior range ########################################################")
     pretty_table(posteriors[case][:,["nr","Method","P_joint_min","P_joint_max","Posterior_min","Posterior_max"]],alignment=:l,highlighters=(hl1,hl2))
     println("########################################################### P_joint (max-abs diff) ###########################################################")
-    pretty_table(hcat(round.(P_joint_diff,sigdigits=2),string.(round.(posteriors[case].time,sigdigits=3))),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=(hl3,hl4))
+    pretty_table(hcat(round.(P_joint_diff,sigdigits=2),string.(round.(posteriors[case].time,sigdigits=3))),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=(hl3))
     println("########################################################### posterior (max-abs diff) ###########################################################")
     pretty_table(hcat(round.(posterior_diff,sigdigits=5),string.(round.(posteriors[case].time,sigdigits=3))),header=vcat(posteriors[case].Method,"time"),row_names=posteriors[case].Method,alignment=:l,highlighters=(hl5,hl6))
 

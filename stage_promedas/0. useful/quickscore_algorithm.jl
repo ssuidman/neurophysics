@@ -8,8 +8,10 @@ function loop_term(myset::Vector{Int64},previn::Vector{T},pfmin::Matrix{T},pfmin
     elseif occursin("trick",method);      
         prod_pfmin = prod(pfmin[myset,:],dims=1); 
         A = prod_pfmin .* previn_pfminneg .+ one_min_previn; 
-        B = (prod_pfmin .* pfminneg' .- 1) .* (1 .- previn'); 
-        term = ((-1)^length(myset)) .* prod(A) .* [1 ; (A .+ B)' ./ A']; 
+        # B = (prod_pfmin .* pfminneg' .- 1) .* one_min_previn;
+        # term = ((-1)^length(myset)) .* prod(A) .* [1 ; (A .+ B)' ./ A']; # --> prod(A + B * I0), with 'I0' the diagonal. 
+        C =   prod_pfmin .* pfminneg'
+        term = ((-1)^length(myset)) .* prod(A) .* [1 ; C' ./ A']; # --> prod(A + B * I0), with 'I0' the diagonal. 
     # if  occursin("prod",method) && !occursin("1-prev",method);              term = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ prev_min_1,dims=2); 
     # elseif  occursin("exp-sum-log",method) && !occursin("1-prev",method);   term = ((-1)^length(myset)) .* exp.(sum(log.(prod(pfmin[myset, :],dims=1) .* prevminneg .+ prev_min_1), dims=2));
     # elseif  occursin("prod",method) && occursin("1-prev",method);           term = ((-1)^length(myset)) .* prod(prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev),dims=2); 
@@ -34,13 +36,15 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
     pfplus_matrix = zeros(float_type,2^m,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
     
     if occursin("thread",method); threading = true;  end; 
-        
+
     prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn')
     prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)
 
     previn_pfminneg = previn' .* pfminneg' 
     one_min_previn = 1 .- previn'
     pfminneg_min_previn = pfminneg' .- previn'
+
+    v_matrix = permutedims(hcat(digits.(0:2^m-1,base=2,pad=m)...))
 
     if method!="MATLAB"
         println("Method: '$method'")
@@ -49,17 +53,22 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
                 println("Multi-threading: $(Threads.nthreads()) threads");
                 pfplus_matrix = [zeros(float_type,n+1,1) for i=1:Threads.nthreads()] 
                 Threads.@threads for i in ProgressBar(0:(2^m-1)) # In VS Code --> settings (left below) --> choose settings --> type in "Julia: Num Threads" and click "Edit in settings.json" --> set '"julia.NumThreads": 4' (if you want to use 4 threads, which is maximum for my macbook)
-                    # println('\n',i,'\n',i)
-                    v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
-                    myset = findall(v.==1) # find places of the 1-elements
-                    # pfplus_matrix[i+1,:,:] = loop_term(myset,previn,pfmin,pfminneg,prevminneg,prev,previn_pfminneg,one_min_previn,pfminneg_min_previn,method)
+                    # v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
+                    myset = findall(v_matrix[i+1,:].==1) # find places of the 1-elements
                     pfplus_matrix[Threads.threadid()] = pfplus_matrix[Threads.threadid()] .+ loop_term(myset,previn,pfmin,pfminneg,prevminneg,prev,previn_pfminneg,one_min_previn,pfminneg_min_previn,method)
+                    # pfplus_matrix[i+1,:,:] = loop_term(myset,previn,pfmin,pfminneg,prevminneg,prev,previn_pfminneg,one_min_previn,pfminneg_min_previn,method)
                 end
                 pfplus_matrix = permutedims(cat(pfplus_matrix...,dims=3),(3,1,2))
+            elseif occursin("vector",method)
+                println("This method is slower than the loop version (but faster than normal) and in addition you cannot keep track of progress or use threading...")
+                prod_pfmin_matrix = prod(reshape(v_matrix,size(v_matrix)...,1) .* reshape(pfmin,1,size(pfmin)...) .+ (1 .- v_matrix), dims=2)[:,1,:]
+                A = prod_pfmin_matrix .* pfminneg' .* previn' .+ (1 .- previn')
+                B = (prod_pfmin_matrix .* pfminneg' .- 1) .* (1 .- previn')
+                pfplus_matrix = (-1).^sum(v_matrix,dims=2) .* prod(A,dims=2) .* [1 ; (A .+ B)' ./ A']'
+                pfplus_matrix = reshape(pfplus_matrix,size(pfplus_matrix)...,1)
             else
                 for i in ProgressBar(0:(2^m-1)) # iterate over 2^m possibilities 
-                    v = digits(i,base=2,pad=m) # create vector of 0's and 1's from binary number i with in total m digits 
-                    myset = findall(v.==1) # find places of the 1-elements
+                    myset = findall(v_matrix[i+1,:].==1) # find places of the 1-elements
                     pfplus_matrix[i+1,:,:] = loop_term(myset,previn,pfmin,pfminneg,prevminneg,prev,previn_pfminneg,one_min_previn,pfminneg_min_previn,method)
                 end
             end
