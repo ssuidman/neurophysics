@@ -95,7 +95,7 @@ end
 # Retrieve the data from the patient cases and others
 methods_others, posterior_others, P_joint_others, dt_others = get_patient_data();
 # Running the function for the different cases m=7,8,9
-quickscore_methods = ["prod","prod BF","prod BF thread","prod Fl128","trick","trick BF","trick BF thread","trick Fl128 thread"]#,"exp-sum-log","exp-sum-log Fl128","prod BF Fl128","prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
+quickscore_methods = ["prod","prod BF thread","trick BF","trick BF thread","trick BF dict","trick Fl128","trick Fl128 thread","trick Fl128 dict"]#,"exp-sum-log","exp-sum-log Fl128","prod BF Fl128","prod Fl32","exp-sum-log Fl32","prod BF Fl64","exp-sum-log BF"];
 posteriors = Dict{String,DataFrame}(
     # "case 1" => posteriors_func("case 1",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
     # "case 2" => posteriors_func("case 2",quickscore_methods,methods_others,posterior_others,P_joint_others,dt_others),
