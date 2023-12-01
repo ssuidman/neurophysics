@@ -58,7 +58,6 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
         elseif threading
             println("Multi-threading: $(Threads.nthreads()) threads");
             pfplus_matrix = [zeros(float_type,n+1,1) for i=1:Threads.nthreads()] 
-            prod_pfmin_dict = Dict{Vector{Int64},Matrix{float_type}}(myset_matrix[i] => prod(pfmin[myset_matrix[i],:],dims=1) for i in 1:m+1); 
             Threads.@threads for i in ProgressBar(1:2^m) # In VS Code --> settings (left below) --> choose settings --> type in "Julia: Num Threads" and click "Edit in settings.json" --> set '"julia.NumThreads": 4' (if you want to use 4 threads, which is maximum for my macbook)
                 prod_pfmin = prod(pfmin[myset_matrix[i],:],dims=1)
                 pfplus_matrix[Threads.threadid()] = pfplus_matrix[Threads.threadid()] .+ loop_term(method,myset_matrix[i],previn,pfmin,pfminneg,prevminneg,prev,previn_pfminneg,one_min_previn,pfminneg_min_previn,prod_pfmin)
