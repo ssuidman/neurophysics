@@ -55,8 +55,5 @@ pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore_fast(previn, pfmin, p
 pfplus_matrix_, pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"trick Fl128 thread");  
 maximum(abs,posterior .- posterior_)
 
-sum(cat(pfplus_matrix...,dims=3),dims=3)[:,:,1]
-pfplus_matrix
-cat(pfplus_matrix...,dims=3)
 
 

@@ -104,24 +104,110 @@ end
 
 
 
+patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 3");
+println("previn:\n\t $(round(mean(previn),sigdigits=3)) +/- $(round(std(previn),sigdigits=3))\npfmin:\n\t $(round(mean(pfmin),sigdigits=3)) +/- $(round(std(pfmin),sigdigits=3))\npfminneg:\n\t $(round(mean(pfminneg),sigdigits=3)) +/- $(round(std(pfminneg),sigdigits=3))")
+gr()
+plot(sort(previn),label="previn",legend=:right,color="blue",dpi=1200)
+plot!(sort(pfminneg),label="pfminneg",color="green")
+# for i=1:9
+#     plot!(sort(pfmin,dims=2)'[:,i],label="pfmin $i",color="red",dpi=1200)
+# end
+plot!(mean(sort(pfmin,dims=2)',dims=2),label="pfmin avg",color="black")
+plot!(sort(prod(pfmin,dims=1),dims=2)',label="prod_pfmin",color="black")
+xlabel!("diagnoses sorted")
+ylabel!("probability")
 
 
 
+patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 3");
+diff_1 = (prod(pfmin,dims=1) .- prod(BigFloat.(pfmin),dims=1)) ./ prod(BigFloat.(pfmin),dims=1)
+diff_2 = (prod(pfmin,dims=1).*prevminneg .- prod(BigFloat.(pfmin),dims=1).*prevminneg) ./ (prod(BigFloat.(pfmin),dims=1).*prevminneg)
+diff_3 = (prod(pfmin,dims=1).*prevminneg.+(1 .-prev) .- prod(BigFloat.(pfmin),dims=1).*prevminneg.+(1 .-prev)) ./ ((prod(BigFloat.(pfmin),dims=1).*prevminneg.+(1 .-prev)))
+diff_4 = (prod(prod(pfmin,dims=1).*prevminneg.+(1 .-prev),dims=2) .- prod(prod(BigFloat.(pfmin),dims=1).*prevminneg.+(1 .-prev),dims=2)) ./ (prod(prod(BigFloat.(pfmin),dims=1).*prevminneg.+(1 .-prev),dims=2))
+
+m,n = size(pfmin)
+A = (prod(pfmin,dims=1).*pfminneg'.*previn'.+(1 .-previn')).*(1 .- [zeros(n) I(n)]') 
+B = prod(pfmin,dims=1).*pfminneg'.*[zeros(n) I(n)]'
+A .+ B
+
+x = rand(m,n)/100
+y = 1 .- rand(m,n)/100
+z = 1 .- rand(m,n)/100
+prod(y,dims=1).*sum(1 ./y,dims=1).*eps(Float64)
+abs.(prod(y,dims=1) .- prod(BigFloat.(y),dims=1))
+
+a = rand(10).*100
+a .- BigFloat.(a)
+prod(a) .- prod(BigFloat.(a))
+a
+
+
+patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 1"); myset = [1,2,3]; m,n=size(pfmin);
+# previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(10,n_disease=1000); myset = [1,2,3]; m,n=size(pfmin);
+pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"prod linear"); 
+pfplus_matrix_, pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"trick BF linear"); 
+# maximum(abs,posterior .- posterior_)
+# hcat(posterior,posterior_)
+myset_matrix = [findall(v.==1) for v in digits.(0:2^m-1,base=2,pad=m)];
+
+hcat([((-1)^length(myset_matrix[i])) .* prod(prod(pfmin[myset_matrix[i],:],dims=1) .* prevminneg .+ (1 .- prev),dims=2)[:,1] for i=1:2^m]...)'
+prod(prod(pfmin[myset_matrix[4],:],dims=1) .* prevminneg .+ (1 .- prev),dims=2)
+
+x = hcat([((-1)^length(myset_matrix[i])) .* prod(prod(pfmin[myset_matrix[i],:],dims=1) .* ones(size(prevminneg)),dims=2)[:,1] for i=1:2^m]...)'
+
+sum(x,dims=1)
+prod(pfmin[myset_matrix[5],:],dims=1)
+
+
+pfplus_matrix_[:,:,1]
+
+pfplus_matrix[:,:,1]
+
+(pfplus_matrix[:,:,1] .- pfplus_matrix_[:,:,1]) ./ pfplus_matrix_[:,:,1]
+pfplus_[:,1]'
+((pfplus[:,1] .- pfplus_[:,1]) ./ pfplus_[:,1])'
+# idx_zero = unique(hcat(collect.(Tuple.(findall(pfplus_matrix_[:,:,1].==0.0)))...)[2,:])[1]
+# pfplus_matrix_[:,idx_zero-4:idx_zero+4,1]
+
+
+myset = [1]
+m,n = size(pfmin)
+prod(prod(pfmin[myset,:],dims=1).*prevminneg.+(1 .-prev),dims=2)'
+A = prod(pfmin[myset,:],dims=1) .* previn'.*pfminneg' .+ (1 .-previn'); 
+B = prod(pfmin[myset,:],dims=1).*pfminneg'; 
+# C = prod(A .+ (B .- A) .* [zeros(n) I(n)]',dims=2)'
+C = prod(A) .* [1 ; B' ./ A']'
+[1 ; B' ./ A']'
+
+
+pfplus, x, z = zeros(n+1,1), copy(previn'), copy(pfminneg');
+for (i,myset) in enumerate(myset_matrix)
+    # prod_pfmin = prod(pfmin[myset,:],dims=1)
+    Y = prod(pfmin[myset,:],dims=1)
+    
+    # term = (-1)^length(myset).*prod(prod_pfmin.*previn'.*pfminneg'.+(1 .-previn'),dims=2).*[1 (prod_pfmin.*pfminneg')./(prod_pfmin.*pfminneg'.*previn'.+(1 .-previn'))]
+    # term = (-1)^length(myset).*[1 prod_pfmin]
+    term = (-1)^length(myset).*prod(Y.*x.*z.+(1 .- x),dims=2).*[1 (Y.*z)./(Y.*z.*x.+(1 .- x))]
+    
+    pfplus = pfplus .+ term'
+
+    println(i-1,"\t",digits(i-1,base=2,pad=m),"\t",round.(pfplus[1:5],sigdigits=3)')
+    # println(i-1,"\t",digits(i-1,base=2,pad=m),"\t",round.(term[1:5]',sigdigits=3)')
+    # println(i-1,"\t",round.(term'[1:5].-term_0'[1:5],sigdigits=3)')
+    # println(i-1,"\t",round.(term'[1:5].-term_last'[1:5],sigdigits=3)')
+end
+
+prod_pfmin = prod(pfmin[[],:],dims=1)
+term_0 = (-1)^length(myset).*prod(prod_pfmin.*previn'.*pfminneg'.+(1 .-previn'),dims=2).*[1 (prod_pfmin.*pfminneg')./(prod_pfmin.*pfminneg'.*previn'.+(1 .-previn'))]
+prod_pfmin = prod(pfmin[[1:m...],:],dims=1)
+term_last = (-1)^length(myset).*prod(prod_pfmin.*previn'.*pfminneg'.+(1 .-previn'),dims=2).*[1 (prod_pfmin.*pfminneg')./(prod_pfmin.*pfminneg'.*previn'.+(1 .-previn'))]
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+myset = Set(1:4)
+# Loop over all combinations
+for k in combinations(1:m)
+    println(k)
+end
+[powerset(1:m)...]
 

@@ -9,7 +9,7 @@ function loop_term(method::String,myset::Vector{Int64},previn::Vector{T},pfmin::
     elseif occursin("trick",method);      
         A = prod_pfmin .* previn_pfminneg .+ one_min_previn; 
         B = prod_pfmin .* pfminneg'
-        term = ((-1)^length(myset)) .* prod(A) .* [1 ; B' ./ A']; # --> prod(A + (B-A) * I0), with 'I0' the diagonal. 
+        term = ((-1)^length(myset)) .* prod(A) .* [1 ; B' ./ A']; # --> prod(A + (B-A) * I0), with I0=[zeros(n) I(n)]' the diagonal. 
     end
     return term
 end
@@ -20,6 +20,8 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
     
     if      occursin("Fl32",method);                            previn, pfmin, pfminneg = [Float32.(x)  for x in [previn, pfmin, pfminneg]]; 
     elseif  occursin("Fl128",method) && !occursin("BF",method); previn, pfmin, pfminneg = [Float128.(x) for x in [previn, pfmin, pfminneg]]; 
+    elseif  occursin("MF3",method);                             previn, pfmin, pfminneg = [Float64x3.(x) for x in [previn, pfmin, pfminneg]]; 
+    elseif  occursin("MF4",method);                             previn, pfmin, pfminneg = [Float64x4.(x) for x in [previn, pfmin, pfminneg]]; 
     elseif  occursin("BF",method);                              previn, pfmin, pfminneg = [BigFloat.(x) for x in [previn, pfmin, pfminneg]]; 
         if  occursin("Fl128",method); setprecision(BigFloat,113); elseif occursin("Fl64",method); setprecision(BigFloat,53); else; setprecision(BigFloat,256); end; 
     end
@@ -30,15 +32,15 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
 
     if occursin("thread",method); threading = true;  end; 
 
-    prev = previn' .+ [zeros(n) I(n)]' .* (1 .- previn')
-    prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)
+    prev = previn' .+ [zeros(float_type,n) I(n)]' .* (1 .- previn')
+    prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(float_type,n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)
 
     previn_pfminneg = previn' .* pfminneg' 
     one_min_previn = 1 .- previn'
     pfminneg_min_previn = pfminneg' .- previn'
     
     if m>21; println("Creating powerset..."); end; 
-    myset_matrix = collect(powerset([1:m...]))
+    if occursin("linear",method); myset_matrix = [findall(v.==1) for v in digits.(0:2^m-1,base=2,pad=m)]; else; myset_matrix = [powerset(1:m)...]; end;
 
     println("Method: '$method'")
     dt = @elapsed begin
@@ -49,10 +51,13 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
                 myset = findall(v.==1) # find places of the 1-elements
                 if length(myset)==0 
                     pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ prevminneg .+ (1 .- prev)), dims=2))
+                    # pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ prevminneg .+ (1 .- prev), dims=2)
                 elseif length(myset)==1 
                     pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev)), dims=2))
+                    # pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ pfmin[myset, :] .* prevminneg .+ (1 .- prev), dims=2)
                 else 
                     pfplus .+= ((-1)^length(myset)) .* exp.(sum(log.(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev))), dims=2))
+                    # pfplus .+= ((-1)^length(myset)) .* prod(1e-50 .+ (prod(pfmin[myset, :],dims=1) .* prevminneg .+ (1 .- prev)), dims=2)
                 end
             end
         elseif threading
@@ -92,7 +97,7 @@ function quickscore(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfminneg::V
         end
     end
 
-    pfplus = sum(pfplus_matrix,dims=1)[1,:,:]
+    pfplus = sum(pfplus_matrix)!=0 ? sum(pfplus_matrix,dims=1)[1,:,:] : pfplus
     P_joint = pfplus[2:end,1] .* previn
     posterior = P_joint / pfplus[1,1] 
     println("Running time: $dt\n")

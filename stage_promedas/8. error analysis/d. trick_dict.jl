@@ -4,11 +4,12 @@ include("../1. random m=1-22/a. quickscore_preparation.jl")
 include("../5. C++ test/a. cpp_preparation_functions.jl")
 
 # patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 1"); myset = [1,2,3]; m,n=size(pfmin);
-previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(20,n_disease=1000); myset = [1,2,3]; m,n=size(pfmin);
-pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"trick Fl128"); 
+previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(16,n_disease=1000); myset = [1,2,3]; m,n=size(pfmin);
+pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"trick BF thread"); 
+pfplus_matrix, pfplus, P_joint, posterior_, dt = quickscore(previn, pfmin, pfminneg,"trick MF3 thread"); 
 pfplus_matrix_, pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"trick Fl128 dict"); 
 pfplus_matrix_, pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"trick Fl128 thread"); 
-# posterior .- posterior_
+maximum(abs,posterior .- posterior_)
 
 
 
