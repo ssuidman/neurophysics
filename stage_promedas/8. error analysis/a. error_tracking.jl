@@ -161,8 +161,6 @@ prod(pfmin[myset_matrix[5],:],dims=1)
 
 pfplus_matrix_[:,:,1]
 
-pfplus_matrix[:,:,1]
-
 (pfplus_matrix[:,:,1] .- pfplus_matrix_[:,:,1]) ./ pfplus_matrix_[:,:,1]
 pfplus_[:,1]'
 ((pfplus[:,1] .- pfplus_[:,1]) ./ pfplus_[:,1])'
@@ -190,8 +188,8 @@ for (i,myset) in enumerate(myset_matrix)
     term = (-1)^length(myset).*prod(Y.*x.*z.+(1 .- x),dims=2).*[1 (Y.*z)./(Y.*z.*x.+(1 .- x))]
     
     pfplus = pfplus .+ term'
-
-    println(i-1,"\t",digits(i-1,base=2,pad=m),"\t",round.(pfplus[1:5],sigdigits=3)')
+    signs = (-1)^length(myset)==1 ? "+" : "-"
+    println(i-1,"\t",digits(i-1,base=2,pad=m),"\t",signs," ",round.(abs.(term)[1:5],sigdigits=3)',"\t",round.(pfplus[1:5],sigdigits=3)')
     # println(i-1,"\t",digits(i-1,base=2,pad=m),"\t",round.(term[1:5]',sigdigits=3)')
     # println(i-1,"\t",round.(term'[1:5].-term_0'[1:5],sigdigits=3)')
     # println(i-1,"\t",round.(term'[1:5].-term_last'[1:5],sigdigits=3)')
@@ -202,12 +200,4 @@ term_0 = (-1)^length(myset).*prod(prod_pfmin.*previn'.*pfminneg'.+(1 .-previn'),
 prod_pfmin = prod(pfmin[[1:m...],:],dims=1)
 term_last = (-1)^length(myset).*prod(prod_pfmin.*previn'.*pfminneg'.+(1 .-previn'),dims=2).*[1 (prod_pfmin.*pfminneg')./(prod_pfmin.*pfminneg'.*previn'.+(1 .-previn'))]
 
-
-
-myset = Set(1:4)
-# Loop over all combinations
-for k in combinations(1:m)
-    println(k)
-end
-[powerset(1:m)...]
 
