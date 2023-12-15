@@ -24,12 +24,16 @@ function quickscore_noisy_max(patientprev::Matrix{Float64}, sens_normal::Matrix{
     
     if      occursin("Fl32",method);    previn, pfmin, pfmin1, pfmin2, pfminneg = [Float32.(x)  for x in [previn, pfmin, pfmin1, pfmin2, pfminneg]]; 
     elseif  occursin("Fl128",method);   previn, pfmin, pfmin1, pfmin2, pfminneg = [Float128.(x) for x in [previn, pfmin, pfmin1, pfmin2, pfminneg]]; 
+    elseif  occursin("MF3",method);     previn, pfmin, pfmin1, pfmin2, pfminneg = [Float64x3.(x) for x in [previn, pfmin, pfmin1, pfmin2, pfminneg]]; 
+    elseif  occursin("MF4",method);     previn, pfmin, pfmin1, pfmin2, pfminneg = [Float64x4.(x) for x in [previn, pfmin, pfmin1, pfmin2, pfminneg]]; 
     elseif  occursin("BF",method);      previn, pfmin, pfmin1, pfmin2, pfminneg = [BigFloat.(x) for x in [previn, pfmin, pfmin1, pfmin2, pfminneg]]; 
     end
     float_type = typeof(previn[1])
+
+    if occursin("thread",method); threading=true; end;
     
     pfplus = zeros(float_type,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
-    pfplus_matrix = zeros(float_type,2^m,n+1,1)
+    pfplus_matrix = zeros(float_type,2^m,2^m1,n+1,1)
     previn_pfminneg = previn' .* pfminneg' 
     one_min_previn = 1 .- previn'
     myset_matrix = collect(powerset([1:m...]))
@@ -44,20 +48,25 @@ function quickscore_noisy_max(patientprev::Matrix{Float64}, sens_normal::Matrix{
             Threads.@threads for i in ProgressBar(1:2^m) # In VS Code --> settings (left below) --> choose settings --> type in "Julia: Num Threads" and click "Edit in settings.json" --> set '"julia.NumThreads": 4' (if you want to use 4 threads, which is maximum for my macbook)
                 for j in 1:2^m1
                     prod_pfmin = prod(pfmin[myset_matrix[i],:],dims=1) .* prod(pfmin1[myset_matrix1[power_m1-j+1],:],dims=1).*prod(pfmin2[myset_matrix1[j],:],dims=1)
-                    pfplus_matrix[Threads.threadid()] = pfplus_matrix[Threads.threadid()] .+ loop_term_fast(myset_matrix[i],pfminneg,previn_pfminneg,one_min_previn,prod_pfmin)
+                    sign = (-1)^(length(myset_matrix[i])+length(myset_matrix1[power_m1-j+1]))
+                    pfplus_matrix[Threads.threadid()] = pfplus_matrix[Threads.threadid()] .+ loop_term_fast(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin)
                 end
             end 
             pfplus = sum(cat(pfplus_matrix...,dims=3),dims=3)
         else
-            for i in ProgressBar(1:2^m) # iterate over 2^m possibilities 
-                for j in 1:2^m1
+            for j in ProgressBar(1:2^m1) # iterate over 2^m possibilities 
+                for i in 1:2^m
                     prod_pfmin = prod(pfmin[myset_matrix[i],:],dims=1) .* prod(pfmin1[myset_matrix1[power_m1-j+1],:],dims=1).*prod(pfmin2[myset_matrix1[j],:],dims=1)
                     sign = (-1)^(length(myset_matrix[i])+length(myset_matrix1[power_m1-j+1]))
-                    # println(myset_matrix[i],'\t',myset_matrix1[power_m1-j+1],'\t',myset_matrix1[j],'\t',sign)
-                    pfplus_matrix[i,:,:] = loop_term_fast(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin)
-                end
+                    pfplus_matrix[i,j,:,:] = loop_term_fast(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin)
+                    # pfplus_matrix[i,:,:] = loop_term_fast(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin)
+                    println(vcat(digits(Int(sum(2 .^myset_matrix1[j]./2)),base=2,pad=4),digits(Int(sum(2 .^myset_matrix[i]./2)),base=2,pad=3)))
+                    println(i,' ',j)
+                    println(Float64.((prod(pfmin1[myset_matrix1[power_m1-j+1],:],dims=1).*prod(pfmin2[myset_matrix1[j],:],dims=1))[1:5]'))
+                    println(Float64.((loop_term_fast(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin).*[1;previn])[1:6]),'\n')
+                end 
             end    
-            pfplus = sum(pfplus_matrix,dims=1)[1,:,:]
+            pfplus = sum(pfplus_matrix,dims=(1,2))[1,1,:,:]
         end
     end
     P_joint = pfplus[2:end,1] .* previn

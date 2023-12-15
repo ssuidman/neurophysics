@@ -39,7 +39,7 @@ function quickscore_preparation(m_wanted;n_disease=100,n_test=30,expected_number
     pfminneg = vec( prod(1 .- sensneg, dims=1) )  # be careful with the dimensions: scalar result prod(1 - sensneg) for singleton neg test is wrong.
 
     m,n = !isempty(pfmin) ? size(pfmin) : (0, length(previn)) # m number of postests. n number of diags. if size(postest) is 0, then we set m=0 `` 
-    println("m = $m (postive tests)")
+    # println("m = $m (postive tests)")
     prev = repeat(previn',inner=(n+1,1)) # copies of prevalences
     for i in 1:n prev[i+1,i]=1 end # set the (i+1,i) entry 1 to condition on d_i=1,  etc. 
     prevminneg = !isempty(pfminneg) ? prev.*pfminneg' : prev.*ones(n+1,n) # absorb negative findings in prevminneg (so these are p(F-|d_1=1)p(d_1=1), ... p(F-|d_n=1)p(d_n=1) ), which is needed in heckerman eqn 11 (compare with heckerman 10, there is a constant difference which is incorporated in the block below)

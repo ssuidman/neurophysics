@@ -6,8 +6,8 @@ include("../9. quickscore Noisy Max/a. quickscore_noisy_max.jl")
 
 # patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 1");
 # pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore(previn,pfmin,pfminneg,"MATLAB"); 
-k = 1
-cases = ["128","125","6","42","404_case_1","404_case_2","404_case_3"]
+k = 7
+cases = ["2","3","6","9","42","125","128","161","404_case_1","404_case_2","404_case_3"]
 matlab_dir = "/Users/sam/Documents/MATLAB/Wim/"; 
 matfile = matopen(joinpath(matlab_dir,"variables/noisy_max/patient_$(cases[k]).mat"),"r"); 
     patientprev = read(matfile, "patientprev"); 
@@ -22,6 +22,8 @@ close(matfile)
 # pfminneg = copy(sens_normal)
 # previn = copy(patientprev)
 pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore_noisy_max(patientprev,sens_normal,sens_medium,sens_extreme,"trick BF");
+# (pfplus_matrix[2,15,:,1]'.*[1;previn])[1:6]'
+maximum(abs,posterior.-pdiag_sam)
 
 file = XLSX.openxlsx("/Users/sam/Large_files/Data/stage_promedas/patient_case_eabove.xlsx")
     if occursin("128",cases[k])
@@ -43,9 +45,28 @@ end
 # Comparison with Alisa's pdiag in hp 
 maximum(abs,P_joint.-P_joint_alisa)
 maximum(abs,posterior.-pdiag)
-# hcat(P_joint,P_joint_alisa)
-# hcat(posterior,pdiag)
+hcat(P_joint,P_joint_alisa)
+hcat(posterior,pdiag)
 
+df = DataFrame(
+    "diagset"=>diagset[:,1],
+    "pdiag"=>posterior,
+    "P_joint"=>P_joint,
+    "P_findings"=>pfplus[1,1],
+    "patientprev_1"=>patientprev[:,1],
+    "sens_normal_1"=>sens_normal[:,1],
+    "sens_medium_1_1"=>sens_medium[:,1,1],
+    "sens_medium_1_2"=>sens_medium[:,1,2],
+    "sens_medium_2_1"=>sens_medium[:,2,1],
+    "sens_medium_2_2"=>sens_medium[:,2,2],
+    "sens_medium_3_1"=>sens_medium[:,3,1],
+    "sens_medium_3_2"=>sens_medium[:,3,2],
+    "sens_medium_4_1"=>sens_medium[:,4,1],
+    "sens_medium_4_2"=>sens_medium[:,4,2],
+)
+
+XLSX.writetable("/Users/sam/Downloads/patient_128_output_sam_3.xlsx",df)
+CSV.write("/Users/sam/Downloads/patient_128_output_sam_3.csv",df)
 
 # m = 6
 # myset_matrix = collect(powerset([1:m...]))
@@ -53,3 +74,6 @@ maximum(abs,posterior.-pdiag)
 #     println(myset_matrix[2^m-i+1],myset_matrix[i])
 #     # println(sort([reverse(myset_matrix)[i];myset_matrix[i]]))
 # end
+
+
+
