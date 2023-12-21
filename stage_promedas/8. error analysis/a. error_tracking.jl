@@ -142,11 +142,11 @@ prod(a) .- prod(BigFloat.(a))
 a
 
 
-patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 1"); myset = [1,2,3]; m,n=size(pfmin);
-# previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(10,n_disease=1000); myset = [1,2,3]; m,n=size(pfmin);
-pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"prod linear"); 
-pfplus_matrix_, pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"trick BF linear"); 
-# maximum(abs,posterior .- posterior_)
+# patient_cases_raw, data_alisa, previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = prepare_patient_data("case 3"); myset = [1,2,3]; m,n=size(pfmin);
+previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(13,n_disease=1000); myset = [1,2,3]; m,n=size(pfmin);
+pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore(previn, pfmin, pfminneg,"trick BF"); 
+pfplus_matrix_, pfplus_, P_joint_, posterior_, dt_ = quickscore(previn, pfmin, pfminneg,"trick MF4"); 
+maximum(abs,posterior .- posterior_)
 # hcat(posterior,posterior_)
 myset_matrix = [findall(v.==1) for v in digits.(0:2^m-1,base=2,pad=m)];
 
