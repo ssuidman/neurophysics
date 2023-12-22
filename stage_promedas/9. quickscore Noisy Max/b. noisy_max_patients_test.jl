@@ -56,8 +56,8 @@ pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore_noisy_max(patientprev
 # Comparison with Alisa's pdiag in hp 
 maximum(abs,P_joint.- P_joint_alisa) 
 maximum(abs,posterior.- pdiag_higher_precision) 
-hcat(P_joint,P_joint_alisa) 
-hcat(posterior,pdiag) 
+# hcat(P_joint,P_joint_alisa)
+# hcat(posterior,pdiag)
 # maximum(abs,pdiag_sam.-pdiag) 
 
 df = DataFrame(

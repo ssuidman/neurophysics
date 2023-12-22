@@ -1,11 +1,6 @@
-include("../0. useful/packages.jl")
-include("../1. random m=1-22/a. quickscore_preparation.jl")
-include("../0. useful/useful_functions.jl")
-include("../0. useful/quickscore_algorithm.jl")
-
 function loop_term_fast(sign::Int64,pfminneg::Vector{T},previn_pfminneg::Matrix{T},one_min_previn::Matrix{T},prod_pfmin::Matrix{T}) where {T <: Real}
     A = prod_pfmin .* previn_pfminneg .+ one_min_previn; 
-    B = prod_pfmin .* pfminneg'
+    B = prod_pfmin .* pfminneg' 
     term = sign .* prod(A) .* [1 ; B' ./ A']; # --> prod(A + (B-A) * I0), with 'I0' the diagonal.  
     return term
 end
@@ -42,9 +37,9 @@ function quickscore_noisy_max(patientprev::Matrix{Float64}, sens_normal::Matrix{
                 prod_pfmin = prod(pfmin[myset_matrix[idx[1]],:],dims=1) .* prod(pfmin1[myset_matrix1[power_m1-idx[2]+1],:],dims=1).*prod(pfmin2[myset_matrix1[idx[2]],:],dims=1)
                 sign = (-1)^(length(myset_matrix[idx[1]])+length(myset_matrix1[power_m1-idx[2]+1]))
                 pfplus_matrix[idx[1],idx[2],:,:] = loop_term_fast(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin)
-                println(vcat(digits(Int(sum(2 .^myset_matrix1[idx[2]]./2)),base=2,pad=4),digits(Int(sum(2 .^myset_matrix[idx[1]]./2)),base=2,pad=3)))
-                println(Float64.((prod(pfmin1[myset_matrix1[power_m1-idx[2]+1],:],dims=1).*prod(pfmin2[myset_matrix1[idx[2]],:],dims=1))[1:5]'))
-                println(Float64.((loop_term_fast(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin).*[1;previn])[1:6]),'\n')
+                # println(vcat(digits(Int(sum(2 .^myset_matrix1[idx[2]]./2)),base=2,pad=4),digits(Int(sum(2 .^myset_matrix[idx[1]]./2)),base=2,pad=3)))
+                # println(Float64.((prod(pfmin1[myset_matrix1[power_m1-idx[2]+1],:],dims=1).*prod(pfmin2[myset_matrix1[idx[2]],:],dims=1))[1:5]'))
+                # println(Float64.((loop_term_fast(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin).*[1;previn])[1:6]),'\n')
             end    
             pfplus = sum(pfplus_matrix,dims=(1,2))[1,1,:,:]
         end
@@ -54,6 +49,16 @@ function quickscore_noisy_max(patientprev::Matrix{Float64}, sens_normal::Matrix{
     println("Running time: $dt\n")
     return pfplus_matrix, pfplus, P_joint, posterior, dt 
 end 
+
+
+matlab_dir = "/Users/sam/Documents/MATLAB/Wim/variables/noisy_max/patient_input.mat"; 
+matfile = matopen(matlab_dir,"r"); 
+    patientprev = read(matfile, "patientprev")[:,1]; 
+    sens_normal = read(matfile, "sens_normal")[:,1]; 
+    sens_medium = read(matfile, "sens_medium"); 
+    sens_extreme = read(matfile, "sens_extreme"); 
+close(matfile)
+
 
 # previn, pfmin, pfminneg, sens, sensneg, prev, prevminneg = quickscore_preparation(13,n_disease=1000);
 # pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore_noisy_max(previn, pfmin, pfminneg,"trick Fl128 thread");  
