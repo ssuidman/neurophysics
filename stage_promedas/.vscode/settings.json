@@ -55,6 +55,5 @@
         "variant": "cpp",
         "vector": "cpp",
         "algorithm": "cpp"
-    },
-    "julia.environmentPath": "/Users/sam/Documents/Programmeren/neurophysics/stage_promedas"
+    }
 }
