@@ -1,2 +1,0 @@
-SERVER matlab.science.ru.nl 782BCB673EA6 26000
-USE_SERVER

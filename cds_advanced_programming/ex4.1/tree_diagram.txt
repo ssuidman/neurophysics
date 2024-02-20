@@ -1,5 +1,0 @@
-    _____________________________________Telephone____________________________________
-    |                          |                           |                          |
-Cable                       Housing                     Dialer                     Handset
-                            /     \                        |                     /    |    \
-                      Chassis      Shell                Button          Mouthpice Earpiece Cable
