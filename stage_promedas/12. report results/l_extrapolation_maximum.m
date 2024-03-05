@@ -1,7 +1,8 @@
 % After running this part an error occurs, but all variables are loaded
 run('/Users/sam/Documents/MATLAB/code_2/matlab/main.m');
 %%
-for x=1:10
+x = 1; 
+while x<11 
     display(x);
     tests = zeros(1,20); 
     tvalues = strings(1,20); 
@@ -33,7 +34,18 @@ for x=1:10
     previn = patientprev(:,1)';
     pfmin = sens_extreme';
     pfminneg = sens_normal';
-    filename = sprintf('/Users/sam/Documents/Programmeren/neurophysics/stage_promedas/12. report results/variables/extrapolation_random_patients/patient_%d.mat', x);
-%     save(filename, 'previn', 'pfmin', 'pfminneg');
+    for j=1:18
+        som = sum(1-pfmin(j,:));
+        if som==0 
+            display(j);
+            display(sum(1-pfmin(j,:))); 
+            tests(k) = 0; 
+            break 
+        elseif som~=0 && j==18 
+            filename = sprintf('/Users/sam/Documents/Programmeren/neurophysics/stage_promedas/12. report results/variables/extrapolation_random_patients/patient_%d.mat', x);
+%             save(filename, 'previn', 'pfmin', 'pfminneg');
+            x = x+1; 
+        end 
+    end
 end 
 

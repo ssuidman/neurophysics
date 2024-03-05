@@ -90,7 +90,7 @@ function prepare_patient_data(case)
                 pfmin_dict["$i"] = read(matfile, "pfmin"); (m,n)=size(pfmin_dict["$i"]);
                 pfminneg_dict["$i"] = read(matfile, "pfminneg")[1,:]; 
                 m_min = 2
-                println("n = $n \t m+ = $m \t m- = $m_min")
+                println("patient $i:\t n = $n \t m+ = $m \t m- = $m_min")
             close(matfile)
         end
     end
