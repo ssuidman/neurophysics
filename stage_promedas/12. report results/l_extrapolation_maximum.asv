@@ -1,0 +1,21 @@
+% After running this part an error occurs, but all variables are loaded
+run('/Users/sam/Documents/MATLAB/code_2/matlab/main.m');
+%%
+
+tests = zeros(1,20); 
+outcome = zeros(1,20); 
+k = 1; 
+while sum(tests ~= 0)~=20
+    i = randi([1,4011]); 
+    if test(i).type == 5 & ~ismember(i,tests)
+        tests(k) = i;
+        if sum(tests ~= 0)<3
+            outcome(k) = "false";
+        else
+            outcome(k) = "true";
+        end
+        k = k+1; 
+    end
+end
+tests = sort(tests); 
+

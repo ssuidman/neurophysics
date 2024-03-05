@@ -1,0 +1,66 @@
+# Patient N = 999
+Age:  30
+Gender:  female
+ERROR. Precision problem. P_findings= 0.000000
+
+NEGATIVE TESTS:
+1   t1827  ecg: axis deviation: left                                              false
+2   t2895  pallor of skin                                                         false
+
+POSITIVE SYMPTOMS AND TESTS:
+1   t55    headache                                                               true
+2   t128   muscle wasting                                                         true
+3   t472   pleural effusion on chest x-ray                                        true
+4   t594   extrimities cold, pale                                                 true
+5   t753   gene product il2rg (cytokine receptor common gamma chain)              true
+6   t848   leg ulcers                                                             true
+7   t859   bloody sputum (haemoptysis)                                            true
+8   t1379  back (spine) pain                                                      true
+9   t1392  diffusing capacity carbon monoxide (dlco) below normal                 true
+10  t1566  limb atrophy                                                           true
+11  t1607  gene product ckn1 (cockayne syndrome wd-repeat protein/eecc-6 associated protein) true
+12  t1762  gene product pex12 (peroxisome assembly protein 12)                    true
+13  t1853  aldosteron decrease (after 1 mg dexamethason overnight)                true
+14  t2142  insulin binding antibodies (anti-insulin igg) present                  true
+15  t2181  hb electrophoresis: raised hb a2 and raised hb f                       true
+16  t2949  rumination                                                             true
+17  t3201  gene product ccm1 (krit-1 protein)                                     true
+18  t3779  systolic murmur ejection type                                          true
+
+KNOWN DIAGNOSIS                                                                                   Explained positive tests:
+Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
+
+DIFFERENTIAL DIAGNOSIS (LARGEST PROBABILITIES)                                                    Explained positive tests:
+Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
+Number of diagnoses connected to positive tests                                                   [322] [ 17] [226] [  2] [  1] [  2] [118] [110] [  2] [  1] [  1] [  1] [  1] [  1] [  1] [  2] [  1] [  3] 
+NaN  0.000300  d5     chronic pancreatitis                                                   ____  ____  0.07  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000010  d11    isosporiasis                                                           0.65  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000000  d36    cestodes (tapeworms)                                                   0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000001  d53    scrub typhus                                                           0.45  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000200  d55    portal hypertension                                                    ____  ____  0.29  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d71    steroids side effects                                                  ____  ____  0.05  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d80    septic arthritis                                                       ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d82    anagrelide side effects                                                0.44  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.001900  d94    varicella (chickenpox)                                                 0.21  ____  0.10  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000020  d100   mycobacterium avium-intracellulare (mai) pneumonia                     0.72  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+
+DIFFERENTIAL DIAGNOSIS (BEST POSITIVE TESTS EXPLANATION)                                          Explained positive tests:
+Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
+NaN  0.000110  d200   ebola virus disease                                                    0.45  ____  0.10  ____  ____  ____  0.20  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000000  d1438  tularaemia                                                             0.20  ____  0.10  ____  ____  ____  0.10  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000030  d1447  leptospirosis                                                          0.90  ____  0.10  ____  ____  ____  0.20  0.20  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000010  d1724  invasive aspergillosis                                                 0.21  ____  0.20  ____  ____  ____  0.10  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000000  d2339  kyasanur forest disease                                                0.75  ____  0.10  ____  ____  ____  0.20  0.20  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000140  d2439  mycobacteriosis, systemic                                              0.21  ____  0.20  ____  ____  ____  0.10  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000001  d2461  blastomycosis                                                          0.21  ____  0.10  ____  ____  ____  0.20  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000093  d2501  legionellosis                                                          0.30  ____  0.20  ____  ____  ____  0.20  0.20  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000040  d2935  rheumatic fever                                                        0.21  ____  0.06  ____  ____  ____  0.05  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000020  d3288  tuberculosis                                                           0.20  ____  0.45  ____  ____  ____  0.45  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+
+CORRECT DIAGNOSIS (GIVEN)                                                                         Explained positive tests:
+Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
+
+Time=  0.064003  seconds.
+
+
+

@@ -1,0 +1,29 @@
+Methods,Julia,MATLAB
+log.(x_matrix),10.294727916,6.114671875
+@avx(log.(x_matrix)),5.97372475,0.0
+log.(x_matrix) BF Fl128 (n=10^11),65.723030292,0.0
+"prod(x_matrix,dims=1)",0.394712875,1.178200125
+"@avx(prod(x_matrix,dims=1))",0.387613958,0.0
+QS exp-sum-log,15.430174875,9.789277541
+QS exp-sum-log @avx(log),7.608944667,0.0
+QS exp-sum-log @avx(log) 2 steps,9.5995385,0.0
+QS exp-sum-log @avx(prod(pfmin)),15.141258,0.0
+QS exp-sum-log @avx(exp),7.592043167,0.0
+QS exp-sum-log broadcast,13.223514625,0.0
+QS exp-sum-log declare-type,15.380532625,0.0
+QS prod,3.181165917,3.008702375
+QS prod @avx(prod(term)),2.879893167,0.0
+QS log,14.51196775,8.551540417
+QS log @avx,7.330197709,0.0
+QS no prod/log,3.287263791,2.212283542
+QS no prod/log @avx,2.422383375,0.0
+Vector: Matrix{Float64},0.384273375,0.821940417
+Vector: Matrix{Int64},2.398675541,0.000629625
+Vector Octavian: Matrix{Float64},0.701124125,0.0
+Vector Octavian: Matrix{Int64},0.719597583,0.0
+Loop: Matrix{Float64},1.965853958,7.084763083
+Loop: Matrix{Int64},1.981693708,46.851491833
+Loop @inbounds: Matrix{Float64},1.602199,0.0
+Loop @inbounds: Matrix{Int64},1.603377792,0.0
+Loop @avx: Matrix{Float64},0.518280792,0.0
+Loop @avx: Matrix{Int64},0.531281083,0.0

@@ -1,0 +1,11 @@
+[deps]
+Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
+CurveFit = "5a033b19-8c74-5913-a970-47c3779ef25c"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
+Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Mex = "5e29dd5e-a72c-11e9-2bb7-cd1b1701caa7"
+NaNStatistics = "b946abbf-3ea7-4610-9019-9858bfdeaf2d"
+Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
+SymPy = "24249f21-da20-56a4-8eb1-6a02cf4ae2e6"
