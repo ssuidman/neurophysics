@@ -4,63 +4,65 @@ Gender:  female
 ERROR. Precision problem. P_findings= 0.000000
 
 NEGATIVE TESTS:
-1   t1342  systolic murmer, right sternal border                                  false
-2   t1431  pelvic pain                                                            false
+1   t781   phonophobia                                                            false
+2   t3035  hyperpigmentation                                                      false
 
 POSITIVE SYMPTOMS AND TESTS:
-1   t8     strawberry tongue                                                      true
-2   t48    nycturia                                                               true
-3   t156   ecg: u wave: present                                                   true
-4   t437   fatigue (tiredness) and malaise                                        true
-5   t490   rash desquamative                                                      true
-6   t899   drooling (driveling, ptyalism, sialorrhea, or slobbering)              true
-7   t1035  purpura, petechiae                                                     true
-8   t1245  delusions                                                              true
-9   t1327  murmer arteria femoralis                                               true
-10  t1353  vaginal bleeding                                                       true
-11  t1436  hypercellular marrow, increase in myeloid precursors                   true
-12  t1540  salivation                                                             true
-13  t1779  biopsy skin lesion: neutrophils around an arteriole or venule          true
-14  t2085  ecg: qrs: high voltage                                                 true
-15  t2290  ecg: p wave: some p waves conduct and others do not                    true
-16  t2663  gene product rab7 (ras-like protein rab-7)                             true
-17  t3163  hemifacial spasm                                                       true
-18  t3879  vegatations confirmed at echocardiography                              true
+1   t111   miliary mottling on chest x-ray                                        true
+2   t136   hyperkeratosis of the palms, soles, punctate                           true
+3   t427   gene product polh (error-prone dna photoproduct bypass polymerase)     true
+4   t613   sweating (diaphoresis)                                                 true
+5   t635   localized right lower quadrant ileus on abdominal x-ray                true
+6   t653   anti-gbm antibodies                                                    true
+7   t1044  pulmonic stenosis at cardiac catheterization                           true
+8   t1138  tremor intention (exacerbated on movement)                             true
+9   t1190  corneal edema                                                          true
+10  t1210  annular skin lesions                                                   true
+11  t1293  left ventricular enlargement on chest x-ray                            true
+12  t1676  deformity of cecal outline on abdominal x-ray                          true
+13  t1767  heinz bodies                                                           true
+14  t2189  kidneys large with multiple bilateral cysts                            true
+15  t2463  carotid sinus massage icreases av-block                                true
+16  t3076  gene product rp1 (oxygen-regulated protein 1)                          true
+17  t3302  bilateral visual field defects                                         true
+18  t3383  uterus not present                                                     true
+19  t3822  iron in marrow present                                                 true
+20  t3902  pseudomembranes at colonoscopy                                         true
 
 KNOWN DIAGNOSIS                                                                                   Explained positive tests:
-Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
+Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
 
 DIFFERENTIAL DIAGNOSIS (LARGEST PROBABILITIES)                                                    Explained positive tests:
-Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
-Number of diagnoses connected to positive tests                                                   [  1] [ 23] [  2] [196] [  6] [  2] [ 14] [ 11] [  2] [ 23] [  1] [  5] [  1] [  1] [  1] [  1] [  1] [  1] 
-NaN  0.004000  d1     chronic hepatitis c infection                                          ____  ____  ____  0.20  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d30    vitamin d side effects                                                 ____  ____  ____  0.03  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d66    apraclonidine side effects                                             ____  ____  ____  0.21  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d71    steroids side effects                                                  ____  0.07  ____  0.08  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000010  d78    milk-alkali syndrome                                                   ____  ____  ____  0.14  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000001  d85    intestinal tuberculosis                                                ____  ____  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d89    amfetamines poisoning                                                  ____  ____  ____  ____  ____  ____  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000020  d100   mycobacterium avium-intracellulare (mai) pneumonia                     ____  ____  ____  0.72  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000200  d117   severe hypokalaemia (potassium depletion)                              ____  ____  0.65  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d119   cryptococcus pneumonia                                                 ____  ____  ____  0.72  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
+Number of diagnoses connected to positive tests                                                   [48]  [17]  [ 1]  [71]  [ 1]  [ 1]  [ 1]  [ 2]  [ 1]  [21]  [ 1]  [ 1]  [ 4]  [ 1]  [ 1]  [ 1]  [ 2]  [ 1]  [ 4]  [ 1]  
+NaN  0.000100  d31    keratosis circumscripta (nigerian children) (keratosis circumscripta)  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000100  d51    lichen planus                                                          ____  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d71    steroids side effects                                                  0.04  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000020  d100   mycobacterium avium-intracellulare (mai) pneumonia                     ____  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d119   cryptococcus pneumonia                                                 ____  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d154   klebsiella pneumonia                                                   ____  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000001  d173   hyperthyroidy by hyperfunctioning ovarian teratoma (struma ovarii)     ____  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d185   radiation pneumonitis                                                  0.05  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000100  d187   punctate keratoderma (keratoderma punctata)                            ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d241   calcitonin side effects                                                ____  ____  ____  0.05  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
 
 DIFFERENTIAL DIAGNOSIS (BEST POSITIVE TESTS EXPLANATION)                                          Explained positive tests:
-Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
-NaN  0.000050  d71    steroids side effects                                                  ____  0.07  ____  0.08  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000850  d252   small/medium pulmonary embolism                                        ____  0.20  ____  0.17  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d307   massive pulmonary embolism                                             ____  0.39  ____  0.33  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d408   bethanechol side effects                                               ____  ____  ____  0.21  ____  ____  ____  ____  ____  ____  ____  0.09  ____  ____  ____  ____  ____  ____  
-NaN  0.000040  d441   myocarditis                                                            ____  0.26  ____  0.36  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d449   st elevation myocardial infarction (stemi)                             ____  0.13  ____  0.36  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000018  d477   scarlet fever                                                          ____  ____  ____  0.45  0.90  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000900  d550   chronic heart failure                                                  ____  0.59  ____  0.90  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.003500  d851   chronic renal failure (crf)                                            ____  0.09  ____  0.20  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d1089  recreational drug abuse                                                ____  ____  ____  0.45  ____  ____  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
+NaN  0.000100  d449   st elevation myocardial infarction (stemi)                             0.18  ____  ____  0.81  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000100  d485   aspirin poisoning                                                      0.05  ____  ____  0.75  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000100  d649   porokeratosis                                                          ____  0.45  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000060  d798   aspiration pneumonia                                                   0.05  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000100  d2034  aluminium zinc phosphides poisoning                                    0.05  ____  ____  ____  ____  ____  ____  0.11  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000100  d3091  organophosphates poisoning                                             0.05  ____  ____  0.11  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.001000  d3186  acute appendicitis                                                     ____  ____  ____  ____  0.40  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000100  d31    keratosis circumscripta (nigerian children) (keratosis circumscripta)  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000100  d51    lichen planus                                                          ____  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d71    steroids side effects                                                  0.04  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
 
 CORRECT DIAGNOSIS (GIVEN)                                                                         Explained positive tests:
-Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
+Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
 
-Time=  0.047736  seconds.
+Time=  0.171514  seconds.
 
 
 

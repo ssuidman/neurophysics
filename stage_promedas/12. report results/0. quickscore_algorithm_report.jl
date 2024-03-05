@@ -22,9 +22,11 @@ function quickscore_report(previn::Vector{Float64}, pfmin::Matrix{Float64}, pfmi
     elseif  occursin("MF3",method);                             previn, pfmin, pfminneg = [Float64x3.(x) for x in [previn, pfmin, pfminneg]]; 
     elseif  occursin("MF4",method);                             previn, pfmin, pfminneg = [Float64x4.(x) for x in [previn, pfmin, pfminneg]]; 
     elseif  occursin("MF5",method);                             previn, pfmin, pfminneg = [Float64x5.(x) for x in [previn, pfmin, pfminneg]]; 
+    elseif  occursin("MF6",method);                             previn, pfmin, pfminneg = [Float64x6.(x) for x in [previn, pfmin, pfminneg]]; 
+    elseif  occursin("MF7",method);                             previn, pfmin, pfminneg = [Float64x7.(x) for x in [previn, pfmin, pfminneg]]; 
     elseif  occursin("D64",method);                             previn, pfmin, pfminneg = [Double64.(x) for x in [previn, pfmin, pfminneg]]; 
     elseif  occursin("BF",method);                              previn, pfmin, pfminneg = [BigFloat.(x) for x in [previn, pfmin, pfminneg]]; 
-        if  occursin("Fl128",method); setprecision(BigFloat,113); elseif occursin("Fl64",method); setprecision(BigFloat,53); elseif occursin("extreme",method); setprecision(BigFloat,600); else; setprecision(BigFloat,300); end; 
+        if  occursin("Fl128",method); setprecision(BigFloat,113); elseif occursin("Fl64",method); setprecision(BigFloat,53); elseif occursin("extreme",method); setprecision(BigFloat,350); else; setprecision(BigFloat,300); end; 
     end
     float_type = typeof(previn[1])
     

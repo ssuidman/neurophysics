@@ -2,12 +2,13 @@
 run('/Users/sam/Documents/MATLAB/code_2/matlab/main.m');
 %%
 x = 1; 
+m = 20; 
 while x<11 
     display(x);
-    tests = zeros(1,20); 
-    tvalues = strings(1,20); 
+    tests = zeros(1,m+2); 
+    tvalues = strings(1,m+2); 
     k = 1; 
-    while sum(tests ~= 0)~=20
+    while sum(tests ~= 0)~=m+2
         i = randi([1,4011]); 
         if ismember(5,test(i).type) && ~ismember(i,tests) 
             tests(k) = i;
@@ -34,14 +35,14 @@ while x<11
     previn = patientprev(:,1)';
     pfmin = sens_extreme';
     pfminneg = sens_normal';
-    for j=1:18
+    for j=1:m
         som = sum(1-pfmin(j,:));
         if som==0 
             display(j);
             display(sum(1-pfmin(j,:))); 
             tests(k) = 0; 
             break 
-        elseif som~=0 && j==18 
+        elseif som~=0 && j==m 
             filename = sprintf('/Users/sam/Documents/Programmeren/neurophysics/stage_promedas/12. report results/variables/extrapolation_random_patients/patient_%d.mat', x);
 %             save(filename, 'previn', 'pfmin', 'pfminneg');
             x = x+1; 
