@@ -43,7 +43,7 @@ while x<11
             tests(k) = 0; 
             break 
         elseif som~=0 && j==m 
-            filename = sprintf('/Users/sam/Documents/Programmeren/neurophysics/stage_promedas/12. report results/variables/extrapolation_random_patients/patient_%d.mat', x);
+            filename = sprintf('/Users/sam/Documents/Programmeren/neurophysics/stage_promedas/12. report results/variables/extrapolation_random_patients/patient_%d.mat', 5);
 %             save(filename, 'previn', 'pfmin', 'pfminneg');
             x = x+1; 
         end 

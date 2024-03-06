@@ -4,65 +4,65 @@ Gender:  female
 ERROR. Precision problem. P_findings= 0.000000
 
 NEGATIVE TESTS:
-1   t781   phonophobia                                                            false
-2   t3035  hyperpigmentation                                                      false
+1   t3745  uterine cramping                                                       false
+2   t3966  abdominal pain radiation to the back                                   false
 
 POSITIVE SYMPTOMS AND TESTS:
-1   t111   miliary mottling on chest x-ray                                        true
-2   t136   hyperkeratosis of the palms, soles, punctate                           true
-3   t427   gene product polh (error-prone dna photoproduct bypass polymerase)     true
-4   t613   sweating (diaphoresis)                                                 true
-5   t635   localized right lower quadrant ileus on abdominal x-ray                true
-6   t653   anti-gbm antibodies                                                    true
-7   t1044  pulmonic stenosis at cardiac catheterization                           true
-8   t1138  tremor intention (exacerbated on movement)                             true
-9   t1190  corneal edema                                                          true
-10  t1210  annular skin lesions                                                   true
-11  t1293  left ventricular enlargement on chest x-ray                            true
-12  t1676  deformity of cecal outline on abdominal x-ray                          true
-13  t1767  heinz bodies                                                           true
-14  t2189  kidneys large with multiple bilateral cysts                            true
-15  t2463  carotid sinus massage icreases av-block                                true
-16  t3076  gene product rp1 (oxygen-regulated protein 1)                          true
-17  t3302  bilateral visual field defects                                         true
-18  t3383  uterus not present                                                     true
-19  t3822  iron in marrow present                                                 true
-20  t3902  pseudomembranes at colonoscopy                                         true
+1   t161   ophthalmoplegia                                                        true
+2   t376   coombs' test (antiglobulin) positive                                   true
+3   t384   painfull swallowing                                                    true
+4   t437   fatigue (tiredness) and malaise                                        true
+5   t881   bleeding from mouth                                                    true
+6   t913   diagnostic paracentesis: ascites                                       true
+7   t1234  ecg: f wave: present                                                   true
+8   t2385  smooth muscle antibodies                                               true
+9   t2390  cervical lymph node enlargement                                        true
+10  t2453  photodistributed located skin lesions                                  true
+11  t2712  biopsy lymph node: kikuchi's disease                                   true
+12  t2785  lack of platelet membrane glycoprotein iib/iiia complex                true
+13  t2874  mouth breathing                                                        true
+14  t3139  amoebic serology is positive                                           true
+15  t3410  innumerable pedunculated polyps throughout the colon at colonoscopy    true
+16  t3454  fibrosing alveolitis on chest x-ray                                    true
+17  t3535  gene product pkd2 (polycystin 2)                                       true
+18  t3683  inguinal lymph node enlargement                                        true
+19  t3784  osteopenia                                                             true
+20  t3900  claudication arm                                                       true
 
 KNOWN DIAGNOSIS                                                                                   Explained positive tests:
 Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
 
 DIFFERENTIAL DIAGNOSIS (LARGEST PROBABILITIES)                                                    Explained positive tests:
 Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
-Number of diagnoses connected to positive tests                                                   [48]  [17]  [ 1]  [71]  [ 1]  [ 1]  [ 1]  [ 2]  [ 1]  [21]  [ 1]  [ 1]  [ 4]  [ 1]  [ 1]  [ 1]  [ 2]  [ 1]  [ 4]  [ 1]  
-NaN  0.000100  d31    keratosis circumscripta (nigerian children) (keratosis circumscripta)  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d51    lichen planus                                                          ____  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d71    steroids side effects                                                  0.04  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000020  d100   mycobacterium avium-intracellulare (mai) pneumonia                     ____  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d119   cryptococcus pneumonia                                                 ____  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d154   klebsiella pneumonia                                                   ____  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000001  d173   hyperthyroidy by hyperfunctioning ovarian teratoma (struma ovarii)     ____  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d185   radiation pneumonitis                                                  0.05  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d187   punctate keratoderma (keratoderma punctata)                            ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d241   calcitonin side effects                                                ____  ____  ____  0.05  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+Number of diagnoses connected to positive tests                                                   [  1] [  5] [  1] [196] [ 10] [ 21] [  2] [  2] [ 16] [  5] [  1] [  1] [  6] [  1] [  1] [  1] [  1] [ 82] [  8] [  1] 
+NaN  0.004000  d1     chronic hepatitis c infection                                          ____  ____  ____  0.20  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000300  d5     chronic pancreatitis                                                   ____  ____  ____  ____  ____  0.11  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000000  d17    pinta                                                                  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  
+NaN  0.000100  d20    erysipelas                                                             ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  
+NaN  0.000079  d26    leprosy (hansen's disease)                                             ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  
+NaN  0.000050  d30    vitamin d side effects                                                 ____  ____  ____  0.03  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000020  d39    amoebic liver abscess                                                  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  0.99  ____  ____  ____  ____  ____  ____  
+NaN  0.000001  d53    scrub typhus                                                           ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  0.20  ____  ____  
+NaN  0.000200  d55    portal hypertension                                                    ____  ____  ____  ____  ____  0.44  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d66    apraclonidine side effects                                             ____  ____  ____  0.21  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
 
 DIFFERENTIAL DIAGNOSIS (BEST POSITIVE TESTS EXPLANATION)                                          Explained positive tests:
 Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
-NaN  0.000100  d449   st elevation myocardial infarction (stemi)                             0.18  ____  ____  0.81  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d485   aspirin poisoning                                                      0.05  ____  ____  0.75  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d649   porokeratosis                                                          ____  0.45  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000060  d798   aspiration pneumonia                                                   0.05  ____  ____  0.54  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d2034  aluminium zinc phosphides poisoning                                    0.05  ____  ____  ____  ____  ____  ____  0.11  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d3091  organophosphates poisoning                                             0.05  ____  ____  0.11  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.001000  d3186  acute appendicitis                                                     ____  ____  ____  ____  0.40  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d31    keratosis circumscripta (nigerian children) (keratosis circumscripta)  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000100  d51    lichen planus                                                          ____  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
-NaN  0.000050  d71    steroids side effects                                                  0.04  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000100  d2285  cat scratch disease                                                    ____  ____  ____  0.31  ____  ____  ____  ____  0.75  ____  ____  ____  ____  ____  ____  ____  ____  0.20  ____  ____  
+NaN  0.000020  d3288  tuberculosis                                                           ____  ____  ____  0.45  ____  ____  ____  ____  0.75  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  
+NaN  0.006000  d888   alcoholic cirrhosis                                                    ____  ____  ____  0.45  ____  0.39  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000500  d913   toxoplasmosis                                                          ____  ____  ____  ____  ____  ____  ____  ____  0.75  ____  ____  ____  ____  ____  ____  ____  ____  0.09  ____  ____  
+NaN  0.000003  d1083  lyme disease                                                           ____  ____  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  
+NaN  0.007400  d1359  atrial fibrillation (af)                                               ____  ____  ____  0.45  ____  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000000  d1438  tularaemia                                                             ____  ____  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  0.10  ____  ____  
+NaN  0.000080  d1547  primary biliary cirrhosis                                              ____  ____  ____  0.55  ____  ____  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
+NaN  0.000050  d1623  herpes simplex virus (hsv) type 1 infection                            ____  ____  ____  0.45  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  0.20  ____  ____  
+NaN  0.002000  d1708  graves' disease                                                        0.30  ____  ____  0.50  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  
 
 CORRECT DIAGNOSIS (GIVEN)                                                                         Explained positive tests:
 Probab.   Preval.   Ndiag  Diagnosis                                                                1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
 
-Time=  0.171514  seconds.
+Time=  0.204001  seconds.
 
 
 

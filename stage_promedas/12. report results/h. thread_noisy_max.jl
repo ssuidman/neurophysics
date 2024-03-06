@@ -8,6 +8,7 @@ patientprev,sens_normal,sens_medium,sens_extreme = prepare_patient_data("case 8"
 method_names = ["trick BF thread","trick thread","trick MF2 thread","trick MF3 thread","trick MF4 thread","trick MF5 thread"]
 float_types = [BigFloat,Float64,Float64x2,Float64x3,Float64x4,Float64x5]
 names_dict = Dict("trick BF thread"=>"BigFloat","trick thread"=>"Float64","trick MF2 thread"=>"Float64x2","trick MF3 thread"=>"Float64x3","trick MF4 thread"=>"Float64x4","trick MF5 thread"=>"Float64x5") 
+eps_names_dict = Dict("trick BF thread"=>"BF","trick MF2"=>"64x2","trick MF2 thread"=>"64x2","trick MF3"=>"64x3","trick MF3 thread"=>"64x3","trick MF4 thread"=>"64x4","trick MF5 thread"=>"64x5","trick"=>"64","trick thread"=>"64") 
 color_dict = Dict("trick BF thread"=>1,"trick thread"=>2,"trick MF2 thread"=>3,"trick MF3 thread"=>4,"trick MF4 thread"=>5,"trick MF5 thread"=>6) 
 
 posterior_dict = Dict(method_name => [Vector{float_types[i]}() for j in 1:m] for (i,method_name) in enumerate(method_names))
@@ -75,7 +76,7 @@ for i in 2:6
     method = method_names[i]
     if occursin("thread",method) & !occursin("BF",method)
         hline!([eps(float_types[i])],color=color_dict[method],linestyle=:dashdot,label=false)
-        annotate!(15, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(names_dict[method])}}}"), :left, :bottom, 7, :black))
+        annotate!(16.5, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
         plot!(1:18,error_df[1:18,method],
             label=names_dict[method],
             legend=:topleft,

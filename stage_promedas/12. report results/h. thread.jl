@@ -9,6 +9,7 @@ previn, pfmin, pfminneg = prepare_patient_data("case 6"); (m,n)=size(pfmin);
 method_names = ["trick BF thread", "trick MF2", "trick MF2 thread", "trick MF3", "trick MF3 thread", "trick MF4 thread","trick MF5 thread", "trick", "trick thread"]
 float_types = [BigFloat, Float64x2, Float64x2, Float64x3, Float64x3, Float64x4, Float64x5, Float64, Float64]
 names_dict = Dict("trick BF thread"=>"BigFloat","trick MF2"=>"Float64x2","trick MF2 thread"=>"Float64x2","trick MF3"=>"Float64x3","trick MF3 thread"=>"Float64x3","trick MF4 thread"=>"Float64x4","trick MF5 thread"=>"Float64x5","trick"=>"Float64","trick thread"=>"Float64") 
+eps_names_dict = Dict("trick BF thread"=>"BF","trick MF2"=>"64x2","trick MF2 thread"=>"64x2","trick MF3"=>"64x3","trick MF3 thread"=>"64x3","trick MF4 thread"=>"64x4","trick MF5 thread"=>"64x5","trick"=>"64","trick thread"=>"64") 
 color_dict = Dict("trick BF thread"=>1,"trick MF2"=>2,"trick MF2 thread"=>2,"trick MF3"=>3,"trick MF3 thread"=>3,"trick MF4 thread"=>4,"trick MF5 thread"=>5,"trick"=>6,"trick thread"=>6) 
 
 posterior_dict = Dict(method_name => [Vector{float_types[i]}() for j in 1:m] for (i,method_name) in enumerate(method_names))
@@ -78,7 +79,7 @@ for i in [8,9,2,3,4,5,6,7,1]
     method = method_names[i]
     if occursin("thread",method) & !occursin("BF",method)
         hline!([eps(float_types[i])],color=color_dict[method],linestyle=:dashdot,label=false)
-        annotate!(15, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(names_dict[method])}}}"), :left, :bottom, 7, :black))
+        annotate!(16.5, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
         plot!(1:18,error_df[1:18,method],
             label=names_dict[method],
             legend=:topleft,
@@ -135,7 +136,7 @@ for i in [8,9,2,3,4,5,6,7,1]
     method = method_names[i]
     if occursin("thread",method) & !occursin("BF",method)
         hline!([eps(float_types[i])],color=color_dict[method],linestyle=:dashdot,label=false)
-        annotate!(29, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(names_dict[method])}}}"), :left, :bottom, 7, :black))
+        annotate!(32.5, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
         plot!(1:18,error_df[1:18,method],
             label=names_dict[method],
             legend=:topleft,
@@ -146,7 +147,7 @@ for i in [8,9,2,3,4,5,6,7,1]
     elseif method=="trick BF thread"
         setprecision(BigFloat,300) # because this is also done in quickscore algorithm
         hline!([eps(float_types[i])],color=color_dict[method],linestyle=:dashdot,label=false)
-        annotate!(29, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(names_dict[method])}}}"), :left, :bottom, 7, :black))
+        annotate!(32.5, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
         plot!(3:18,error_df[3:18,method],
             label=names_dict[method],
             legend=:topleft,
@@ -210,6 +211,8 @@ plot!(8:35,10 .^(a .+ b.*[8:35...]),label=nothing,line=(1,:dash),yscale=:log10,c
 for i in [9,3,5,6,7,1]
     method = method_names[i]
     if occursin("thread",method) & !occursin("BF",method)
+        hline!([eps(float_types[i])],color=color_dict[method],line=(0.3,:dashdot),label=false)
+        annotate!(32.5, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
         plot!(1:18,pfplus_BF[1:18]./eps(float_types[i]),label=nothing,legend=:topleft,yscale=:log10,line=(0.3,:dashdot),color=color_dict[method]) 
         a,b = linear_fit(8:18,log10.(pfplus_BF[8:18]))
         plot!(8:35,10 .^(a .+ b.*[8:35...])./eps(float_types[i]),label=nothing,line=(0.3,:dashdot),yscale=:log10,color=color_dict[method])
@@ -221,6 +224,8 @@ for i in [9,3,5,6,7,1]
             color=color_dict[method]
         ) 
     elseif method=="trick BF thread"
+        hline!([eps(float_types[i])],color=color_dict[method],line=(0.3,:dashdot),label=false)
+        annotate!(32.5, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
         setprecision(BigFloat,300) # because this is also done in quickscore algorithm
         plot!(1:18,pfplus_BF[1:18]./eps(float_types[i]),label=nothing,legend=:topleft,yscale=:log10,line=(0.3,:dashdot),color=color_dict[method]) 
         a,b = linear_fit(8:18,log10.(pfplus_BF[8:18]))
