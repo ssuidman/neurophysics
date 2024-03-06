@@ -108,9 +108,9 @@ end
 
 gr() 
 default(fontfamily="Times New Roman") 
-p1 = plot(21:32,fill(10^-4,12),fillrange=fill(10^6.1,12),fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^-4,10^6),xlabel="#iterations when "*latexstring("\\delta>0.1"),ylabel=L"t(s) \cdot \frac{1000}{n}",xticks=([5:5:30...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[-4:6...],legend=:topleft)
-p2 = plot(21:32,fill(10^-4,12),fillrange=fill(10^6.1,12),fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^-4,10^6),xlabel="#iterations when "*latexstring("\\delta>0.1"),ylabel=L"t(s) \cdot \frac{1000}{n}",xticks=([5:5:30...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[-4:6...],legend=:topleft)
-p3 = plot(21:32,fill(10^-1,12),fillrange=fill(10^15,12), fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^0,10^13),xlabel="#iterations when "*latexstring("\\delta>0.1"),ylabel=L"\tau_p"                   ,xticks=([5:5:35...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[0:13...],legend=:topleft)
+p1 = plot(21:32,fill(10^-4,12),fillrange=fill(10^6.1,12),fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^-4,10^6),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"t(s) \cdot \frac{1000}{n}",xticks=([5:5:30...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[-4:6...],legend=:topleft)
+p2 = plot(21:32,fill(10^-4,12),fillrange=fill(10^6.1,12),fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^-4,10^6),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"t(s) \cdot \frac{1000}{n}",xticks=([5:5:30...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[-4:6...],legend=:topleft)
+p3 = plot(21:32,fill(10^-1,12),fillrange=fill(10^15,12), fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^0,10^13),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"\tau"                     ,xticks=([5:5:35...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[0:13...],legend=:topleft)
 for k in 1:length(previn_dict)
     n = length(previn_dict["$k"])
     extrapolation_df = extrapolation_df_dict["$k"]
