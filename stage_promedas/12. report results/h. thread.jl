@@ -141,34 +141,36 @@ for i in [8,9,2,3,4,5,6,7,1]
             label=names_dict[method],
             legend=:topleft,
             yscale=:log10,
+            ylim=(10^-80,10^2),
             # title="relative error",
             color=color_dict[method]
         ) 
-    elseif method=="trick BF thread"
-        setprecision(BigFloat,300) # because this is also done in quickscore algorithm
-        hline!([eps(float_types[i])],color=color_dict[method],linestyle=:dashdot,label=false)
-        annotate!(32.5, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
-        plot!(3:18,error_df[3:18,method],
-            label=names_dict[method],
-            legend=:topleft,
-            ylim=(10^-110,10^2),
-            yscale=:log10,
-            # title="relative error",
-            color=color_dict[method]
-        ) 
-    else
-        plot!(1:18,error_df[1:18,method],
-            label=false,
-            legend=:topleft,
-            ylim=(10^-110,10^2),
-            yscale=:log10,
-            # title="relative error",
-            color=color_dict[method],
-            line=(2,:dash)
-        ) 
+    # elseif method=="trick BF thread"
+    #     setprecision(BigFloat,300) # because this is also done in quickscore algorithm
+    #     hline!([eps(float_types[i])],color=color_dict[method],linestyle=:dashdot,label=false)
+    #     annotate!(32.5, eps(float_types[i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
+    #     plot!(3:18,error_df[3:18,method],
+    #         label=names_dict[method],
+    #         legend=:topleft,
+    #         ylim=(10^-110,10^2),
+    #         yscale=:log10,
+    #         # title="relative error",
+    #         color=color_dict[method]
+    #     ) 
+    # else
+    #     plot!(1:18,error_df[1:18,method],
+    #         label=false,
+    #         legend=:topleft,
+    #         ylim=(10^-110,10^2),
+    #         yscale=:log10,
+    #         # title="relative error",
+    #         color=color_dict[method],
+    #         line=(2,:dash)
+    #     ) 
     end
 end
-for i in [1,5,6,7]
+# for i in [1,5,6,7]
+for i in [5,6,7]
     method = method_names[i]
     a,b = linear_fit(8:18,log10.(error_df[8:18,method]))
     plot!(8:35,10 .^(a .+ b.*[8:35...]),label=nothing,line=(1,:dash),yscale=:log10,color=color_dict[method])

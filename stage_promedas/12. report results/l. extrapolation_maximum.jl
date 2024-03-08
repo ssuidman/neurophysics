@@ -11,6 +11,7 @@ pfplus_matrix, pfplus2, P_joint, posterior2, dt = quickscore_report(previn,pfmin
 method_names = ["trick $(type)thread" for type in ["BF extreme ","MF6 ","MF5 ","MF4 ","MF3 ","MF2 ",""]]
 float_types = [BigFloat,Float64x6,Float64x5,Float64x4,Float64x3,Float64x2,Float64]
 names_dict = Dict("trick thread"=>"Float64","trick MF2 thread"=>"Float64x2","trick MF3 thread"=>"Float64x3","trick MF4 thread"=>"Float64x4","trick MF5 thread"=>"Float64x5","trick MF6 thread"=>"Float64x6","trick BF extreme thread"=>"BigFloat") 
+eps_names_dict = Dict("trick BF thread"=>"BF","trick MF2"=>"64x2","trick MF2 thread"=>"64x2","trick MF3"=>"64x3","trick MF3 thread"=>"64x3","trick MF4 thread"=>"64x4","trick MF5 thread"=>"64x5","trick MF6 thread"=>"64x6","trick"=>"64","trick thread"=>"64") 
 color_dict = Dict(method=>8-i for (i,method) in enumerate(method_names))
 setprecision(BigFloat,350) # because this has also been done in quickscore algorithm 
 eps_dict = Dict(method=>Float64(eps(float_types[i])) for (i,method) in enumerate(method_names))
@@ -108,22 +109,32 @@ end
 
 gr() 
 default(fontfamily="Times New Roman") 
-p1 = plot(21:32,fill(10^-4,12),fillrange=fill(10^6.1,12),fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^-4,10^6),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"t(s) \cdot \frac{1000}{n}",xticks=([5:5:30...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[-4:6...],legend=:topleft)
-p2 = plot(21:32,fill(10^-4,12),fillrange=fill(10^6.1,12),fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^-4,10^6),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"t(s) \cdot \frac{1000}{n}",xticks=([5:5:30...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[-4:6...],legend=:topleft)
-p3 = plot(21:32,fill(10^-1,12),fillrange=fill(10^15,12), fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^0,10^13),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"\tau"                     ,xticks=([5:5:35...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[0:13...],legend=:topleft)
+# markers = [:circle, :utriangle, :dtriangle, :square, :diamond, :pentagon, :hexagon, :star4, :star5, :star6]
+# markers = [:circle,:utriangle,:utriangle,:utriangle,:circle,:utriangle,:utriangle,:circle,:utriangle,:utriangle]
+markers = [:circle for i=1:10]
+p1 = plot(21:32,fill(10^-4,12),  fillrange=fill(10^6.1,12),fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^-4,10^6),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"t(s) \cdot \frac{1000}{n}",xticks=([5:5:30...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[-4:6...],legend=:topleft)
+p2 = plot(21:32,fill(10^-4,12),  fillrange=fill(10^6.1,12),fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^-4,10^6),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"t(s) \cdot \frac{1000}{n}",xticks=([5:5:30...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[-4:6...],legend=:topleft)
+p3 = plot(21:32,fill(10^-1,12),  fillrange=fill(10^15,12), fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^0,10^13),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"\tau"                     ,xticks=([5:5:35...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[0:13...],legend=:topleft)
+p4 = plot(21:32,fill(10^-100,12),fillrange=fill(10^15,12), fillalpha=0.15,color="red",label=false,yscale=:log10,xlims=(0,31),ylims=(10^-100,10^0),xlabel="max #iterations for "*latexstring("\\delta<0.1"),ylabel=L"p(F^+,F^-)"             ,xticks=([5:5:35...],[latexstring("2^{$k}") for k in 5:5:30]),yticks=10.0.^[-100:10:0...],legend=:bottomleft)
 for k in 1:length(previn_dict)
     n = length(previn_dict["$k"])
     extrapolation_df = extrapolation_df_dict["$k"]
     for i in 6:-1:1
         method = extrapolation_df[i,"method"]
         if k==1
-            scatter!(p1,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"dt"]],label=names_dict[method],color=color_dict[method])
-            scatter!(p2,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"dt"]/n*1000],label=names_dict[method],color=color_dict[method])
-            scatter!(p3,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"pfplus"]]/[eps_dict[method]],label=names_dict[method],color=color_dict[method])
+            scatter!(p1,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"dt"]],label=names_dict[method],marker=markers[k],color=color_dict[method])
+            scatter!(p2,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"dt"]/n*1000],label=names_dict[method],marker=markers[k],color=color_dict[method])
+            scatter!(p3,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"pfplus"]]/[eps_dict[method]],label=names_dict[method],marker=markers[k],color=color_dict[method])
+            scatter!(p4,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"pfplus"]],label=names_dict[method],marker=markers[k],color=color_dict[method])
+            hline!(p4,[eps(float_types[8-i])],color=color_dict[method],line=(0.3,:dashdot),label=false)
+            annotate!(p4,28.5, eps(float_types[8-i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
         else
-            scatter!(p1,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"dt"]],label=false,color=color_dict[method])
-            scatter!(p2,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"dt"]/n*1000],label=false,color=color_dict[method])
-            scatter!(p3,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"pfplus"]]/[eps_dict[method]],label=false,color=color_dict[method])
+            scatter!(p1,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"dt"]],label=false,marker=markers[k],color=color_dict[method])
+            scatter!(p2,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"dt"]/n*1000],label=false,marker=markers[k],color=color_dict[method])
+            scatter!(p3,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"pfplus"]]/[eps_dict[method]],label=false,marker=markers[k],color=color_dict[method])
+            scatter!(p4,[extrapolation_df[i,"m_max"]],[extrapolation_df[i,"pfplus"]],label=false,marker=markers[k],color=color_dict[method])
+            hline!(p4,[eps(float_types[8-i])],color=color_dict[method],line=(0.3,:dashdot),label=false)
+            annotate!(p4,28.5, eps(float_types[8-i]), text(latexstring("\\textbf{\\epsilon_{\\textbf{$(eps_names_dict[method])}}}"), :bottom, 7, :black))
         end
     end
 end
@@ -133,11 +144,30 @@ annotate!(p1,26.25,10^-2,text("extrapolated",7,"red"))
 vline!(p2,[m+1],color="red",label=false)
 annotate!(p2,16.75,10^-2,text("measured",7,"black"))
 annotate!(p2,26.25,10^-2,text("extrapolated",7,"red"))
+hline!(p2,[60],color="black",line=(0.3,:dash),label=false)
+annotate!(p2,15, [60], text("minute", :bottom, 7, :black))
+hline!(p2,[60*60],color="black",line=(0.3,:dash),label=false)
+annotate!(p2,15, [60*60], text("hour", :bottom, 7, :black))
+hline!(p2,[60*60*24],color="black",line=(0.3,:dash),label=false)
+annotate!(p2,15, [60*60*24], text("day", :bottom, 7, :black))
 vline!(p3,[m+1],color="red",label=false)
 annotate!(p3,16.75,10^2,text("measured",7,"black"))
 annotate!(p3,26.25,10^2,text("extrapolated",7,"red"))
+vline!(p4,[m+1],color="red",label=false)
+annotate!(p4,16.75,10^-8,text("measured",7,"black"))
+annotate!(p4,26.25,10^-8,text("extrapolated",7,"red"))
 # p = plot(p1,p2,layout=(1,2),dpi=600)
 p = plot(p2,p3,layout=(1,2),dpi=600)
-# savefig("/Users/sam/Documents/Programmeren/neurophysics/stage_promedas/12. report results/figures/l_extrapolation_maximum.png")
+# savefig("/Users/sam/Documents/Programmeren/neurophysics/stage_promedas/12. report results/figures/l_extrapolation_maximum_fig1.png")
+p = plot(p2,p4,layout=(1,2),dpi=600)
+# savefig("/Users/sam/Documents/Programmeren/neurophysics/stage_promedas/12. report results/figures/l_extrapolation_maximum_fig2.png")
+
+# Calculate on avarage how much longer e.g. MF6 is than MF5
+all_running_times = reduce(vcat,[Matrix(dt_df_dict["$k"]) for k=1:10]);
+MF6_divided_MF5 = mean(all_running_times[:,6]./all_running_times[:,5])
+MF5_divided_MF4 = mean(all_running_times[:,5]./all_running_times[:,4])
+MF4_divided_MF3 = mean(all_running_times[:,4]./all_running_times[:,3])
+MF3_divided_MF2 = mean(all_running_times[:,3]./all_running_times[:,2])
+MF2_divided_64 = mean(all_running_times[:,2]./all_running_times[:,7])
 
 
