@@ -3,7 +3,7 @@ include("0. quickscore_algorithm_report.jl")
 include("0. prepare_patient_case_9.jl")
 
 previn_dict,pfmin_dict,pfminneg_dict = prepare_patient_data("case 9"); m=size(pfmin_dict["1"],1); 
-# previn,pfmin,pfminneg = prepare_patient_data("case 6"); m=size(pfmin); 
+previn,pfmin,pfminneg = prepare_patient_data("case 6"); m=size(pfmin); 
 pfplus_matrix, pfplus, P_joint, posterior, dt = quickscore_report(previn,pfmin[1:10,:],pfminneg,"trick BF thread");  
 pfplus_matrix, pfplus1, P_joint, posterior1, dt = quickscore_report(previn,pfmin[1:10,:],pfminneg,"trick thread");  
 pfplus_matrix, pfplus2, P_joint, posterior2, dt = quickscore_report(previn,pfmin[1:10,:],pfminneg,"trick MF2 thread");  

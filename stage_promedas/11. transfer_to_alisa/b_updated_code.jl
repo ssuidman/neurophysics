@@ -43,17 +43,20 @@ function quickscore_noisy_max(patientprev::Matrix{Float64}, sens_normal::Matrix{
     """
     # Changing the float type based on whether "Fl32", "Fl128", etc is present in the method, Float64 is default. 
     float_df = DataFrame(
-        "Fl32"=>Float32,
-        "Fl128"=>Float128,
-        "MF2"=>Float64x2,
-        "MF3"=>Float64x3,
-        "MF4"=>Float64x4,
-        "MF5"=>Float64x5,
-        "MF6"=>Float64x6,
-        "MF7"=>Float64x7,
-        "MF8"=>Float64x8,
-        "BF"=>BigFloat
+        "Fl32"=>Float32,    # eps(Float32)      = 10^-7
+        "Fl128"=>Float128,  # eps(Float128)     = 10^-34
+        "MF2"=>Float64x2,   # eps(Float64x2)    = 10^-32
+        "MF3"=>Float64x3,   # eps(Float64x3)    = 10^-47
+        "MF4"=>Float64x4,   # eps(Float64x4)    = 10^-63 
+        "MF5"=>Float64x5,   # eps(Float64x5)    = 10^-79
+        "MF6"=>Float64x6,   # eps(Float64x6)    = 10^-94
+        "MF7"=>Float64x7,   # eps(Float64x7)    = 10^-110
+        "MF8"=>Float64x8,   # eps(Float64x8)    = 10^-126
+        "BF"=>BigFloat      # eps(BigFloat)     = 10^-77 --> but you can set it arbitrarily high (but with even longer running times)
     )
+    # You increase BigFloat precision if needed here, normally it is set to 256 corresponding to eps(BigFloat)=10^-77 
+    BF_precision = 256
+    setprecision(BigFloat,BF_precision)
     float_type = float_df[1,names(float_df)[occursin.(names(float_df),method)][1]]
     patientprev,sens_normal,sens_medium,sens_extreme = [float_type.(x)  for x in [patientprev,sens_normal,sens_medium,sens_extreme]]; 
 
@@ -71,6 +74,7 @@ function quickscore_noisy_max(patientprev::Matrix{Float64}, sens_normal::Matrix{
 
     # Creating the input matrix (2 possible forms) in which all summing terms are saved in, based on whether threading is chosen or not 
     pfplus_matrix = threading ? [zeros(float_type,n+1,1) for i=1:Threads.nthreads()] : zeros(float_type,2^m,2^m1,n+1,1) 
+    pfplus = zeros(float_type,n+1,1)  # will be used for P(F+,F-), P(F+,F-|d_1=1),... P(F+,F-|d_n=1) (note F- will be absorbed below) 
     # Calculating two other input variables before the loop to spare time 
     previn_pfminneg = previn' .* pfminneg' 
     # one_min_previn = Array(patientprev[:,2]')
@@ -103,10 +107,11 @@ function quickscore_noisy_max(patientprev::Matrix{Float64}, sens_normal::Matrix{
                 # calculating the sign 
                 sign = (-1)^(length(myset_matrix[idx[1]])+length(myset_matrix1[power_m1-idx[2]+1]))
                 # the term that is obtained from the loop-function is stored in pfplus_matrix 
-                pfplus_matrix[idx[1],idx[2],:,:] = loop_term_noisy_max(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin)
+                pfplus = pfplus .+ loop_term_noisy_max(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin)
+                # pfplus_matrix[idx[1],idx[2],:,:] = loop_term_noisy_max(sign,pfminneg,previn_pfminneg,one_min_previn,prod_pfmin)
             end    
             # all terms from pfplus_matrix are summed to get pfplus 
-            pfplus = sum(pfplus_matrix,dims=(1,2))[1,1,:,:]
+            # pfplus = sum(pfplus_matrix,dims=(1,2))[1,1,:,:]
         end
     end
     # calculating P_joint and posterior from pfplus and returing it 

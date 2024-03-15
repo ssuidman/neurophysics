@@ -43,6 +43,6 @@ function plotting_m_1_22(save_figure)
         savefig("/Users/sam/Documents/Programmeren/neurophysics/stage_promedas/12. report results/figures/b_running_time_comparison_quickscore.png")
     end
 end
-# plotting_m_1_22(true)
+plotting_m_1_22(false)
 
 
